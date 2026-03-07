@@ -1,7 +1,8 @@
 -- Dream One Lab Database Schema (Enhanced with Google Drive & Additional Features)
+-- This schema is idempotent - safe to run multiple times
 
 -- Profiles table (extends auth.users)
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     full_name TEXT,
     phone TEXT UNIQUE,
@@ -16,7 +17,7 @@ CREATE TABLE profiles (
 );
 
 -- Books table
-CREATE TABLE books (
+CREATE TABLE IF NOT EXISTS books (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title TEXT NOT NULL,
     author TEXT NOT NULL,
@@ -38,7 +39,7 @@ CREATE TABLE books (
 );
 
 -- Episodes table
-CREATE TABLE episodes (
+CREATE TABLE IF NOT EXISTS episodes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     book_id UUID NOT NULL REFERENCES books(id) ON DELETE CASCADE,
     episode_number INTEGER NOT NULL,
@@ -55,7 +56,7 @@ CREATE TABLE episodes (
 );
 
 -- Purchases table (PhonePe integrated)
-CREATE TABLE purchases (
+CREATE TABLE IF NOT EXISTS purchases (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     book_id UUID REFERENCES books(id) ON DELETE SET NULL,
@@ -69,7 +70,7 @@ CREATE TABLE purchases (
 );
 
 -- Listening history
-CREATE TABLE listening_history (
+CREATE TABLE IF NOT EXISTS listening_history (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     episode_id UUID NOT NULL REFERENCES episodes(id) ON DELETE CASCADE,
@@ -80,7 +81,7 @@ CREATE TABLE listening_history (
 );
 
 -- Listen progress (real-time tracking)
-CREATE TABLE listen_progress (
+CREATE TABLE IF NOT EXISTS listen_progress (
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     episode_id UUID NOT NULL REFERENCES episodes(id) ON DELETE CASCADE,
     position_seconds INTEGER DEFAULT 0,
@@ -89,7 +90,7 @@ CREATE TABLE listen_progress (
 );
 
 -- Bookmarks
-CREATE TABLE bookmarks (
+CREATE TABLE IF NOT EXISTS bookmarks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     book_id UUID NOT NULL REFERENCES books(id) ON DELETE CASCADE,
@@ -98,7 +99,7 @@ CREATE TABLE bookmarks (
 );
 
 -- Downloads tracking
-CREATE TABLE downloads (
+CREATE TABLE IF NOT EXISTS downloads (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     episode_id UUID NOT NULL REFERENCES episodes(id) ON DELETE CASCADE,
@@ -106,7 +107,7 @@ CREATE TABLE downloads (
 );
 
 -- Listens (analytics)
-CREATE TABLE listens (
+CREATE TABLE IF NOT EXISTS listens (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     episode_id UUID REFERENCES episodes(id) ON DELETE CASCADE,
@@ -115,7 +116,7 @@ CREATE TABLE listens (
 );
 
 -- Alerts (admin notifications)
-CREATE TABLE alerts (
+CREATE TABLE IF NOT EXISTS alerts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title TEXT NOT NULL,
     content TEXT,
@@ -125,7 +126,7 @@ CREATE TABLE alerts (
 );
 
 -- Audit logs (system logging)
-CREATE TABLE audit_logs (
+CREATE TABLE IF NOT EXISTS audit_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
     event_type TEXT NOT NULL,
@@ -139,14 +140,17 @@ CREATE TABLE audit_logs (
 -- Profiles
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
 CREATE POLICY "Users can view own profile"
     ON profiles FOR SELECT
     USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can update own profile"
     ON profiles FOR UPDATE
     USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Admins can view all profiles" ON profiles;
 CREATE POLICY "Admins can view all profiles"
     ON profiles FOR SELECT
     USING (
@@ -159,12 +163,14 @@ CREATE POLICY "Admins can view all profiles"
 -- Books
 ALTER TABLE books ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Anyone can view published books" ON books;
 CREATE POLICY "Anyone can view published books"
     ON books FOR SELECT
     USING (is_published = TRUE OR EXISTS (
         SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = TRUE
     ));
 
+DROP POLICY IF EXISTS "Admins can manage books" ON books;
 CREATE POLICY "Admins can manage books"
     ON books FOR ALL
     USING (
@@ -177,6 +183,7 @@ CREATE POLICY "Admins can manage books"
 -- Episodes
 ALTER TABLE episodes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Anyone can view episodes of published books" ON episodes;
 CREATE POLICY "Anyone can view episodes of published books"
     ON episodes FOR SELECT
     USING (
@@ -184,6 +191,7 @@ CREATE POLICY "Anyone can view episodes of published books"
         OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = TRUE)
     );
 
+DROP POLICY IF EXISTS "Admins can manage episodes" ON episodes;
 CREATE POLICY "Admins can manage episodes"
     ON episodes FOR ALL
     USING (
@@ -196,10 +204,12 @@ CREATE POLICY "Admins can manage episodes"
 -- Purchases
 ALTER TABLE purchases ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own purchases" ON purchases;
 CREATE POLICY "Users can view own purchases"
     ON purchases FOR SELECT
     USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Admins can view all purchases" ON purchases;
 CREATE POLICY "Admins can view all purchases"
     ON purchases FOR SELECT
     USING (
@@ -212,10 +222,12 @@ CREATE POLICY "Admins can view all purchases"
 -- Listening history
 ALTER TABLE listening_history ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own listening history" ON listening_history;
 CREATE POLICY "Users can view own listening history"
     ON listening_history FOR SELECT
     USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own listening history" ON listening_history;
 CREATE POLICY "Users can update own listening history"
     ON listening_history FOR ALL
     USING (auth.uid() = user_id);
@@ -223,6 +235,7 @@ CREATE POLICY "Users can update own listening history"
 -- Listen progress
 ALTER TABLE listen_progress ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage own listen progress" ON listen_progress;
 CREATE POLICY "Users can manage own listen progress"
     ON listen_progress FOR ALL
     USING (auth.uid() = user_id);
@@ -230,6 +243,7 @@ CREATE POLICY "Users can manage own listen progress"
 -- Bookmarks
 ALTER TABLE bookmarks ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage own bookmarks" ON bookmarks;
 CREATE POLICY "Users can manage own bookmarks"
     ON bookmarks FOR ALL
     USING (auth.uid() = user_id);
@@ -237,6 +251,7 @@ CREATE POLICY "Users can manage own bookmarks"
 -- Downloads
 ALTER TABLE downloads ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own downloads" ON downloads;
 CREATE POLICY "Users can view own downloads"
     ON downloads FOR ALL
     USING (auth.uid() = user_id);
@@ -244,6 +259,7 @@ CREATE POLICY "Users can view own downloads"
 -- Listens (analytics)
 ALTER TABLE listens ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can create own listens" ON listens;
 CREATE POLICY "Users can create own listens"
     ON listens FOR INSERT
     WITH CHECK (auth.uid() = user_id);
@@ -251,10 +267,12 @@ CREATE POLICY "Users can create own listens"
 -- Alerts
 ALTER TABLE alerts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Anyone can view active alerts" ON alerts;
 CREATE POLICY "Anyone can view active alerts"
     ON alerts FOR SELECT
     USING (is_active = TRUE);
 
+DROP POLICY IF EXISTS "Admins can manage alerts" ON alerts;
 CREATE POLICY "Admins can manage alerts"
     ON alerts FOR ALL
     USING (
@@ -267,6 +285,7 @@ CREATE POLICY "Admins can manage alerts"
 -- Audit logs
 ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Admins can view audit logs" ON audit_logs;
 CREATE POLICY "Admins can view audit logs"
     ON audit_logs FOR SELECT
     USING (
@@ -277,20 +296,20 @@ CREATE POLICY "Admins can view audit logs"
     );
 
 -- Indexes for performance
-CREATE INDEX idx_episodes_book_id ON episodes(book_id);
-CREATE INDEX idx_episodes_episode_order ON episodes(episode_order);
-CREATE INDEX idx_purchases_user_id ON purchases(user_id);
-CREATE INDEX idx_purchases_payment_ref ON purchases(payment_ref);
-CREATE INDEX idx_profiles_phone ON profiles(phone);
-CREATE INDEX idx_profiles_is_admin ON profiles(is_admin);
-CREATE INDEX idx_profiles_subscription_tier ON profiles(subscription_tier);
-CREATE INDEX idx_books_genre ON books(genre);
-CREATE INDEX idx_books_is_published ON books(is_published);
-CREATE INDEX idx_listening_history_user_id ON listening_history(user_id);
-CREATE INDEX idx_listening_history_episode_id ON listening_history(episode_id);
-CREATE INDEX idx_bookmarks_user_id ON bookmarks(user_id);
-CREATE INDEX idx_listens_user_id ON listens(user_id);
-CREATE INDEX idx_listens_episode_id ON listens(episode_id);
+CREATE INDEX IF NOT EXISTS idx_episodes_book_id ON episodes(book_id);
+CREATE INDEX IF NOT EXISTS idx_episodes_episode_order ON episodes(episode_order);
+CREATE INDEX IF NOT EXISTS idx_purchases_user_id ON purchases(user_id);
+CREATE INDEX IF NOT EXISTS idx_purchases_payment_ref ON purchases(payment_ref);
+CREATE INDEX IF NOT EXISTS idx_profiles_phone ON profiles(phone);
+CREATE INDEX IF NOT EXISTS idx_profiles_is_admin ON profiles(is_admin);
+CREATE INDEX IF NOT EXISTS idx_profiles_subscription_tier ON profiles(subscription_tier);
+CREATE INDEX IF NOT EXISTS idx_books_genre ON books(genre);
+CREATE INDEX IF NOT EXISTS idx_books_is_published ON books(is_published);
+CREATE INDEX IF NOT EXISTS idx_listening_history_user_id ON listening_history(user_id);
+CREATE INDEX IF NOT EXISTS idx_listening_history_episode_id ON listening_history(episode_id);
+CREATE INDEX IF NOT EXISTS idx_bookmarks_user_id ON bookmarks(user_id);
+CREATE INDEX IF NOT EXISTS idx_listens_user_id ON listens(user_id);
+CREATE INDEX IF NOT EXISTS idx_listens_episode_id ON listens(episode_id);
 
 -- Trigger to create profile on user signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -308,6 +327,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW
@@ -326,11 +346,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_episode_count_on_insert ON episodes;
 CREATE TRIGGER update_episode_count_on_insert
     AFTER INSERT ON episodes
     FOR EACH ROW
     EXECUTE FUNCTION update_book_episode_count();
 
+DROP TRIGGER IF EXISTS update_episode_count_on_delete ON episodes;
 CREATE TRIGGER update_episode_count_on_delete
     AFTER DELETE ON episodes
     FOR EACH ROW
