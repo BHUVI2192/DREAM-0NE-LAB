@@ -424,15 +424,15 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION update_listen_progress(
     user_uuid UUID,
     episode_uuid UUID,
-    position INTEGER
+    position_secs INTEGER
 )
 RETURNS VOID AS $$
 BEGIN
     INSERT INTO listen_progress (user_id, episode_id, position_seconds, updated_at)
-    VALUES (user_uuid, episode_uuid, position, NOW())
+    VALUES (user_uuid, episode_uuid, position_secs, NOW())
     ON CONFLICT (user_id, episode_id)
     DO UPDATE SET
-        position_seconds = position,
+        position_seconds = position_secs,
         updated_at = NOW();
 END;
 $$ LANGUAGE plpgsql;
