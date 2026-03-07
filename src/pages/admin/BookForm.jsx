@@ -11,10 +11,14 @@ export default function BookForm() {
         title: '',
         author: '',
         description: '',
+        blurb: '',
         genre: '',
+        language: 'English',
         cover_url: '',
+        is_published: false,
+        is_premium: false,
         is_special: false,
-        special_price: 49
+        price: 49
     })
 
     useEffect(() => {
@@ -103,24 +107,49 @@ export default function BookForm() {
                 </div>
 
                 <div>
-                    <label className="block text-text-secondary mb-2">Description *</label>
+                    <label className="block text-text-secondary mb-2">Blurb (Short description) *</label>
                     <textarea
-                        value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        className="w-full bg-bg-secondary border border-border-subtle rounded-lg px-4 py-3 text-white focus:outline-none focus:border-accent h-32"
+                        value={formData.blurb}
+                        onChange={(e) => setFormData({ ...formData, blurb: e.target.value })}
+                        className="w-full bg-bg-secondary border border-border-subtle rounded-lg px-4 py-3 text-white focus:outline-none focus:border-accent h-24"
                         required
                     />
                 </div>
 
                 <div>
-                    <label className="block text-text-secondary mb-2">Genre *</label>
-                    <input
-                        type="text"
-                        value={formData.genre}
-                        onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
-                        className="w-full bg-bg-secondary border border-border-subtle rounded-lg px-4 py-3 text-white focus:outline-none focus:border-accent"
-                        required
+                    <label className="block text-text-secondary mb-2">Full Description</label>
+                    <textarea
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        className="w-full bg-bg-secondary border border-border-subtle rounded-lg px-4 py-3 text-white focus:outline-none focus:border-accent h-32"
                     />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-text-secondary mb-2">Genre *</label>
+                        <input
+                            type="text"
+                            value={formData.genre}
+                            onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
+                            className="w-full bg-bg-secondary border border-border-subtle rounded-lg px-4 py-3 text-white focus:outline-none focus:border-accent"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-text-secondary mb-2">Language</label>
+                        <select
+                            value={formData.language}
+                            onChange={(e) => setFormData({ ...formData, language: e.target.value })}
+                            className="w-full bg-bg-secondary border border-border-subtle rounded-lg px-4 py-3 text-white focus:outline-none focus:border-accent"
+                        >
+                            <option value="English">English</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="Tamil">Tamil</option>
+                            <option value="Telugu">Telugu</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div>
@@ -133,24 +162,48 @@ export default function BookForm() {
                     />
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <input
-                        type="checkbox"
-                        id="is_special"
-                        checked={formData.is_special}
-                        onChange={(e) => setFormData({ ...formData, is_special: e.target.checked })}
-                        className="w-5 h-5"
-                    />
-                    <label htmlFor="is_special" className="text-white">Special Series (requires individual purchase)</label>
+                <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                        <input
+                            type="checkbox"
+                            id="is_published"
+                            checked={formData.is_published}
+                            onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })}
+                            className="w-5 h-5"
+                        />
+                        <label htmlFor="is_published" className="text-white">Publish this book (make it visible to users)</label>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <input
+                            type="checkbox"
+                            id="is_premium"
+                            checked={formData.is_premium}
+                            onChange={(e) => setFormData({ ...formData, is_premium: e.target.checked })}
+                            className="w-5 h-5"
+                        />
+                        <label htmlFor="is_premium" className="text-white">Premium book (requires subscription)</label>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <input
+                            type="checkbox"
+                            id="is_special"
+                            checked={formData.is_special}
+                            onChange={(e) => setFormData({ ...formData, is_special: e.target.checked })}
+                            className="w-5 h-5"
+                        />
+                        <label htmlFor="is_special" className="text-white">Special series (requires individual purchase)</label>
+                    </div>
                 </div>
 
                 {formData.is_special && (
                     <div>
-                        <label className="block text-text-secondary mb-2">Special Price (₹)</label>
+                        <label className="block text-text-secondary mb-2">Price (₹)</label>
                         <input
                             type="number"
-                            value={formData.special_price}
-                            onChange={(e) => setFormData({ ...formData, special_price: parseInt(e.target.value) })}
+                            value={formData.price}
+                            onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) })}
                             className="w-full bg-bg-secondary border border-border-subtle rounded-lg px-4 py-3 text-white focus:outline-none focus:border-accent"
                         />
                     </div>

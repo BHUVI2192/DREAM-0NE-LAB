@@ -68,9 +68,9 @@ serve(async (req) => {
             .insert({
                 user_id: userId,
                 book_id: isSpecial ? bookId : null,
-                transaction_id: transactionId,
-                amount: amount / 100,
-                status: 'pending',
+                payment_ref: transactionId,
+                amount_inr: amount / 100,
+                payment_status: 'pending',
                 is_special: isSpecial
             })
 

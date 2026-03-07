@@ -1,8 +1,8 @@
 import useAuth from '../hooks/useAuth'
-import { User } from 'lucide-react'
+import { User, Crown } from 'lucide-react'
 
 export default function Profile() {
-    const { user, profile } = useAuth()
+    const { user, profile, isSubscribed } = useAuth()
 
     return (
         <div className="max-w-2xl mx-auto space-y-8">
@@ -15,16 +15,16 @@ export default function Profile() {
                     </div>
                     <div>
                         <h2 className="text-2xl font-bold text-white">
-                            {profile?.display_name || profile?.full_name || 'User'}
+                            {profile?.full_name || 'User'}
                         </h2>
-                        <p className="text-text-secondary">{profile?.phone || profile?.email}</p>
+                        <p className="text-text-secondary">{profile?.phone || profile?.phone_number || profile?.email}</p>
                     </div>
                 </div>
 
                 <div className="space-y-4 border-t border-border-subtle pt-6">
                     <div>
                         <label className="text-text-muted text-sm">Phone</label>
-                        <p className="text-white">{profile?.phone || 'Not set'}</p>
+                        <p className="text-white">{profile?.phone || profile?.phone_number || 'Not set'}</p>
                     </div>
                     <div>
                         <label className="text-text-muted text-sm">Email</label>
@@ -32,14 +32,24 @@ export default function Profile() {
                     </div>
                     <div>
                         <label className="text-text-muted text-sm">Subscription Status</label>
-                        <p className="text-white">
-                            {profile?.subscription_expiry 
-                                ? new Date(profile.subscription_expiry) > new Date() 
-                                    ? '✅ Active' 
-                                    : '❌ Expired'
-                                : '❌ No Subscription'
-                            }
-                        </p>
+                        <div className="flex items-center gap-2">
+                            {isSubscribed ? (
+                                <>
+                                    <Crown className="w-5 h-5 text-yellow-400" />
+                                    <span className="text-white font-semibold">Premium Active</span>
+                                </>
+                            ) : (
+                                <span className="text-text-muted">Free Tier</span>
+                            )}
+                        </div>
+                        {profile?.subscription_expiry && (
+                            <p className="text-text-muted text-sm mt-1">
+                                {isSubscribed 
+                                    ? `Expires: ${new Date(profile.subscription_expiry).toLocaleDateString()}`
+                                    : `Expired: ${new Date(profile.subscription_expiry).toLocaleDateString()}`
+                                }
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>

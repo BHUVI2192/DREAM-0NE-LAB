@@ -28,13 +28,16 @@ export default function Users() {
     }
 
     const filteredUsers = users.filter(user =>
-        user.name?.toLowerCase().includes(search.toLowerCase()) ||
+        user.full_name?.toLowerCase().includes(search.toLowerCase()) ||
         user.phone?.includes(search) ||
+        user.phone_number?.includes(search) ||
         user.email?.toLowerCase().includes(search.toLowerCase())
     )
 
-    const isSubscribed = (subscriptionEnd) => {
-        return subscriptionEnd && new Date(subscriptionEnd) > new Date()
+    const isSubscribed = (profile) => {
+        return profile?.subscription_tier === 'premium' &&
+            profile?.subscription_expiry && 
+            new Date(profile.subscription_expiry) > new Date()
     }
 
     return (
@@ -78,12 +81,12 @@ export default function Users() {
                         <tbody>
                             {filteredUsers.map((user) => (
                                 <tr key={user.id} className="border-t border-border-subtle hover:bg-bg-secondary/50">
-                                    <td className="px-6 py-4 text-white">{user.name || 'N/A'}</td>
-                                    <td className="px-6 py-4 text-text-muted">{user.phone || 'N/A'}</td>
+                                    <td className="px-6 py-4 text-white">{user.full_name || 'N/A'}</td>
+                                    <td className="px-6 py-4 text-text-muted">{user.phone || user.phone_number || 'N/A'}</td>
                                     <td className="px-6 py-4 text-text-muted">{user.email || 'N/A'}</td>
                                     <td className="px-6 py-4">
-                                        <span className={`text-xs px-3 py-1 rounded-full ${isSubscribed(user.subscription_end) ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}`}>
-                                            {isSubscribed(user.subscription_end) ? 'Active' : 'Free'}
+                                        <span className={`text-xs px-3 py-1 rounded-full ${isSubscribed(user) ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}`}>
+                                            {isSubscribed(user) ? 'Premium' : 'Free'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-text-muted text-sm">

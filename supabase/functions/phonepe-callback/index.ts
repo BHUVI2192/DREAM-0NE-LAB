@@ -57,30 +57,29 @@ serve(async (req) => {
         const { data: purchase, error: fetchError } = await supabase
             .from('purchases')
             .select('*')
-            .eq('transaction_id', merchantTransactionId)
+            .eq('payment_ref', merchantTransactionId)
             .single()
 
         if (fetchError || !purchase) {
             throw new Error('Purchase not found')
         }
 
-        const status = paymentStatus === 'COMPLETED' ? 'success' : 'failed'
+        const payment_status = paymentStatus === 'COMPLETED' ? 'success' : 'failed'
 
         const { error: updateError } = await supabase
             .from('purchases')
             .update({
-                status,
-                phonepe_transaction_id: result.data.transactionId,
-                completed_at: new Date().toISOString()
+                payment_status,
+                phonepe_transaction_id: result.data.transactionId
             })
-            .eq('transaction_id', merchantTransactionId)
+            .eq('payment_ref', merchantTransactionId)
 
         if (updateError) {
             throw updateError
         }
 
         // If successful, extend subscription or grant access
-        if (status === 'success') {
+        if (payment_status === 'success') {
             if (purchase.is_special) {
                 // Special book purchase - access is automatic via purchases table
                 console.log(`Special book ${purchase.book_id} unlocked for user ${purchase.user_id}`)
@@ -99,7 +98,7 @@ serve(async (req) => {
 
         // Redirect user
         const appUrl = Deno.env.get('APP_URL') || 'http://localhost:5173'
-        const redirectUrl = `${appUrl}/payment/result?status=${status === 'success' ? 'success' : 'failure'}`
+        const redirectUrl = `${appUrl}/payment/result?status=${payment_status === 'success' ? 'success' : 'failure'}`
 
         return new Response(null, {
             status: 302,

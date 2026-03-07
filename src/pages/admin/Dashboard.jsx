@@ -18,18 +18,23 @@ export default function Dashboard() {
         try {
             const [usersRes, booksRes, subsRes, revenueRes] = await Promise.all([
                 supabase.from('profiles').select('id', { count: 'exact' }),
-                supabase.from('books').select('id', { count: 'exact' }),
-                supabase.from('profiles').select('id', { count: 'exact' }).gt('subscription_end', new Date().toISOString()),
-                supabase.from('purchases').select('amount', { count: 'exact' }).eq('status', 'success')
+                supabase.from('books').select('id', { count: 'exact' }).eq('is_published', true),
+                supabase.from('profiles')
+                    .select('id', { count: 'exact' })
+                    .eq('subscription_tier', 'premium')
+                    .gt('subscription_expiry', new Date().toISOString()),
+                supabase.from('purchases')
+                    .select('amount_inr', { count: 'exact' })
+                    .eq('payment_status', 'success')
             ])
 
-            const totalRevenue = revenueRes.data?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0
+            const totalRevenue = revenueRes.data?.reduce((sum, p) => sum + (parseFloat(p.amount_inr) || 0), 0) || 0
 
             setStats({
                 totalUsers: usersRes.count || 0,
                 totalBooks: booksRes.count || 0,
                 activeSubscriptions: subsRes.count || 0,
-                revenue: totalRevenue
+                revenue: Math.round(totalRevenue)
             })
         } catch (error) {
             console.error('Failed to load stats:', error)
