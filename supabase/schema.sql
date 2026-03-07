@@ -135,6 +135,97 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Add missing columns to existing tables (for schema updates)
+DO $$ 
+BEGIN
+    -- Add columns to profiles if they don't exist
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='profiles' AND column_name='phone_number') THEN
+        ALTER TABLE profiles ADD COLUMN phone_number TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='profiles' AND column_name='subscription_tier') THEN
+        ALTER TABLE profiles ADD COLUMN subscription_tier TEXT DEFAULT 'free';
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='profiles' AND column_name='subscription_expiry') THEN
+        ALTER TABLE profiles ADD COLUMN subscription_expiry TIMESTAMP WITH TIME ZONE;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='profiles' AND column_name='is_admin') THEN
+        ALTER TABLE profiles ADD COLUMN is_admin BOOLEAN DEFAULT FALSE;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='profiles' AND column_name='avatar_url') THEN
+        ALTER TABLE profiles ADD COLUMN avatar_url TEXT;
+    END IF;
+
+    -- Add columns to books if they don't exist
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='books' AND column_name='blurb') THEN
+        ALTER TABLE books ADD COLUMN blurb TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='books' AND column_name='language') THEN
+        ALTER TABLE books ADD COLUMN language TEXT DEFAULT 'English';
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='books' AND column_name='cover_drive_id') THEN
+        ALTER TABLE books ADD COLUMN cover_drive_id TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='books' AND column_name='is_published') THEN
+        ALTER TABLE books ADD COLUMN is_published BOOLEAN DEFAULT FALSE;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='books' AND column_name='is_special') THEN
+        ALTER TABLE books ADD COLUMN is_special BOOLEAN DEFAULT FALSE;
+    END IF;
+
+    -- Add columns to episodes if they don't exist
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='episodes' AND column_name='audio_drive_id') THEN
+        ALTER TABLE episodes ADD COLUMN audio_drive_id TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='episodes' AND column_name='duration_seconds') THEN
+        ALTER TABLE episodes ADD COLUMN duration_seconds INTEGER DEFAULT 0;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='episodes' AND column_name='is_free') THEN
+        ALTER TABLE episodes ADD COLUMN is_free BOOLEAN DEFAULT FALSE;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='episodes' AND column_name='episode_order') THEN
+        ALTER TABLE episodes ADD COLUMN episode_order INTEGER;
+    END IF;
+
+    -- Add columns to purchases if they don't exist
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='purchases' AND column_name='payment_ref') THEN
+        ALTER TABLE purchases ADD COLUMN payment_ref TEXT UNIQUE;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='purchases' AND column_name='phonepe_transaction_id') THEN
+        ALTER TABLE purchases ADD COLUMN phonepe_transaction_id TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='purchases' AND column_name='amount_inr') THEN
+        ALTER TABLE purchases ADD COLUMN amount_inr NUMERIC;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='purchases' AND column_name='payment_status') THEN
+        ALTER TABLE purchases ADD COLUMN payment_status TEXT DEFAULT 'pending';
+    END IF;
+END $$;
+
+-- Add constraints if they don't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'profiles_subscription_tier_check'
+    ) THEN
+        ALTER TABLE profiles ADD CONSTRAINT profiles_subscription_tier_check 
+            CHECK (subscription_tier IN ('free', 'premium'));
+    END IF;
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'purchases_payment_status_check'
+    ) THEN
+        ALTER TABLE purchases ADD CONSTRAINT purchases_payment_status_check 
+            CHECK (payment_status IN ('pending', 'success', 'failed', 'cancelled'));
+    END IF;
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
+
 -- Row Level Security Policies
 
 -- Profiles
