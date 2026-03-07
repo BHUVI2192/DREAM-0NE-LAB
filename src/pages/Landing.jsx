@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { Headphones, BookOpen, Unlock, Play } from 'lucide-react'
 import Skeleton from '../components/ui/Skeleton'
-import { useAuth } from '../hooks/useAuth'
+import useAuth from '../hooks/useAuth'
 
 export default function Landing() {
     const [books, setBooks] = useState([])
