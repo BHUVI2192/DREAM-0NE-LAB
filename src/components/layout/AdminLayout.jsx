@@ -71,7 +71,7 @@ export default function AdminLayout() {
                             <Zap className="w-4 h-4 text-black fill-black" />
                         </div>
                         <div>
-                            <p className="text-white text-sm font-bold tracking-tight">Dream Lab</p>
+                            <p className="text-white text-sm font-bold tracking-tight">Dream One Lab</p>
                             <p className="text-[#1DB954] text-[10px] font-medium uppercase tracking-widest">Admin</p>
                         </div>
                     </div>

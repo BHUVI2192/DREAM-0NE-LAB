@@ -53,7 +53,7 @@ export default function Settings() {
                 </div>
             ))}
 
-            <p className="text-white/20 text-xs text-center pt-2">Dream Lab Admin v1.0 — Full settings coming soon</p>
+            <p className="text-white/20 text-xs text-center pt-2">Dream One Lab Admin v1.0 — Full settings coming soon</p>
         </div>
     )
 }

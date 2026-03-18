@@ -61,7 +61,7 @@ export default function Login() {
                         </div>
 
                         <h2 className="text-3xl font-bold text-white mb-2 text-center tracking-tight">Welcome Back</h2>
-                        <p className="text-text-secondary text-center mb-8 text-sm">Sign in to continue to Dream Lab</p>
+                        <p className="text-text-secondary text-center mb-8 text-sm">Sign in to continue to Dream One Lab</p>
 
                         {/* Email Login Form */}
                         <form onSubmit={handleLogin} className="space-y-5">

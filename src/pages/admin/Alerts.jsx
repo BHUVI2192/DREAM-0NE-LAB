@@ -3,8 +3,8 @@ import { Bell, Send, Users, Crown, Info, Loader2, RefreshCw } from 'lucide-react
 import { supabase } from '../../lib/supabase'
 
 const TEMPLATES = [
-    { id: 'new_book', label: 'New Book Available', body: 'A new audiobook has just been added to Dream Lab. Check it out now!' },
-    { id: 'renewal', label: 'Subscription Renewal', body: 'Your Dream Lab Premium subscription renews tomorrow. Enjoy uninterrupted listening!' },
+    { id: 'new_book', label: 'New Book Available', body: 'A new audiobook has just been added to Dream One Lab. Check it out now!' },
+    { id: 'renewal', label: 'Subscription Renewal', body: 'Your Dream One Lab Premium subscription renews tomorrow. Enjoy uninterrupted listening!' },
     { id: 'promo',   label: 'Promotional Offer',   body: 'Special offer: Upgrade to Premium today and get 10% off your first month!' },
 ]
 

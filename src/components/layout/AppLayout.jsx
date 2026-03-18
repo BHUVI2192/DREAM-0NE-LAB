@@ -52,7 +52,7 @@ export default function AppLayout() {
                     className="font-display font-bold text-xl tracking-tight"
                     style={{ color: 'var(--accent-glow)' }}
                 >
-                    Dream Lab
+                    Dream One Lab
                 </span>
 
                 {/* Avatar + Logout */}

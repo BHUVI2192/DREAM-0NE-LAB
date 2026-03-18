@@ -72,7 +72,7 @@ export default function Signup() {
                         </div>
 
                         <h2 className="text-3xl font-bold text-white mb-2 text-center tracking-tight">Create an account</h2>
-                        <p className="text-text-secondary text-center mb-8 text-sm">Join Dream Lab to start listening</p>
+                        <p className="text-text-secondary text-center mb-8 text-sm">Join Dream One Lab to start listening</p>
 
                         {/* Signup Form */}
                         <form onSubmit={handleSignup} className="space-y-4">

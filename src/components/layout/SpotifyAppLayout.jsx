@@ -73,7 +73,7 @@ export default function SpotifyAppLayout() {
                         <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-accent to-blue-500 flex items-center justify-center">
                             <span className="text-sm font-bold text-white tracking-widest pl-0.5">DL</span>
                         </div>
-                        <span className="text-[1.1rem] font-bold tracking-tight">Dream Lab</span>
+                        <span className="text-[1.1rem] font-bold tracking-tight">Dream One Lab</span>
                     </div>
 
                     {navItems.map(({ to, label, Icon }) => {
@@ -115,7 +115,7 @@ export default function SpotifyAppLayout() {
 
                         {/* Mobile Title */}
                         <div className={`md:hidden text-lg font-bold tracking-tight transition-opacity duration-300 ${headerOpacity > 0.5 ? 'opacity-100' : 'opacity-0'}`}>
-                            Dream Lab
+                            Dream One Lab
                         </div>
                     </div>
 

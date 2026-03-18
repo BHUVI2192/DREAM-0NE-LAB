@@ -96,7 +96,7 @@ export default function Landing() {
                         <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
                             <span className="text-white text-xs font-black tracking-tight">DL</span>
                         </div>
-                        <span className="text-white font-bold text-lg tracking-tight">Dream Lab</span>
+                        <span className="text-white font-bold text-lg tracking-tight">Dream One Lab</span>
                     </div>
                     <div className="flex items-center gap-3">
                         <Link to="/login" className="hidden sm:block text-sm text-white/60 hover:text-white transition-colors px-4 py-2">
@@ -138,7 +138,7 @@ export default function Landing() {
                         style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)' }}
                     >
                         <Sparkles className="w-3.5 h-3.5" />
-                        For the Dream Lab Community
+                        For the Dream One Lab Community
                     </div>
 
                     {/* Headline */}
@@ -203,7 +203,7 @@ export default function Landing() {
             <section className="py-24 px-5 sm:px-8">
                 <div className="max-w-6xl mx-auto">
                     <FadeUp className="text-center mb-16">
-                        <p className="text-violet-400 text-xs font-bold uppercase tracking-[0.2em] mb-3">Why Dream Lab</p>
+                        <p className="text-violet-400 text-xs font-bold uppercase tracking-[0.2em] mb-3">Why Dream One Lab</p>
                         <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
                             Built for listeners who mean business
                         </h2>
@@ -229,7 +229,7 @@ export default function Landing() {
                     <FadeUp className="flex items-end justify-between mb-8 gap-4 flex-wrap">
                         <div>
                             <p className="text-violet-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Now Available</p>
-                            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white">What's on Dream Lab</h2>
+                            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white">What's on Dream One Lab</h2>
                         </div>
                         <div className="flex gap-2">
                             <button
@@ -367,7 +367,7 @@ export default function Landing() {
                                 <div className="text-center md:text-left">
                                     <p className="text-violet-400 text-xs font-bold uppercase tracking-[0.2em] mb-3">YouTube Community</p>
                                     <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-4">
-                                        Made for the Dream Lab YouTube community
+                                        Made for the Dream One Lab YouTube community
                                     </h2>
                                     <p className="text-white/50 text-base leading-relaxed mb-6 max-w-lg">
                                         If you already watch our channel, you know the stories. Now hear them like never before — fully produced, immersive audio.
@@ -405,7 +405,7 @@ export default function Landing() {
                                     Your next favourite<br />story is waiting.
                                 </h2>
                                 <p className="text-white/50 text-base mb-10 max-w-md mx-auto">
-                                    Create your free account and start exploring Dream Lab's growing library of audio stories.
+                                    Create your free account and start exploring Dream One Lab's growing library of audio stories.
                                 </p>
                                 <Link
                                     to="/signup"
@@ -428,7 +428,7 @@ export default function Landing() {
                             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
                                 <span className="text-white text-[10px] font-black">DL</span>
                             </div>
-                            <span className="text-white font-bold">Dream Lab</span>
+                            <span className="text-white font-bold">Dream One Lab</span>
                             <span className="text-white/25 text-sm">· Stories worth your time</span>
                         </div>
                         <div className="flex gap-7 text-sm text-white/40">
@@ -438,7 +438,7 @@ export default function Landing() {
                         </div>
                     </div>
                     <div className="border-t border-white/[0.04] pt-6 text-center text-xs text-white/20">
-                        © {new Date().getFullYear()} Dream Lab. Made with ❤️ in India.
+                        © {new Date().getFullYear()} Dream One Lab. Made with ❤️ in India.
                     </div>
                 </div>
             </footer>

@@ -47,13 +47,13 @@ function isTransientNetworkError(error) {
 function formatAuthBootstrapMessage(scope, error) {
     if (isTransientNetworkError(error)) {
         return scope === 'profile'
-            ? 'Signed in, but Dream Lab could not refresh your account details. Some account-dependent features may be stale until the connection returns.'
-            : 'Dream Lab could not reach Supabase to verify your session. Check the connection and retry.'
+            ? 'Signed in, but Dream One Lab could not refresh your account details. Some account-dependent features may be stale until the connection returns.'
+            : 'Dream One Lab could not reach Supabase to verify your session. Check the connection and retry.'
     }
 
     return scope === 'profile'
-        ? 'Dream Lab could not load your account details. Some account-dependent features may be unavailable until retry.'
-        : 'Dream Lab could not verify your session. Retry to continue.'
+        ? 'Dream One Lab could not load your account details. Some account-dependent features may be unavailable until retry.'
+        : 'Dream One Lab could not verify your session. Retry to continue.'
 }
 
 export default function App() {
