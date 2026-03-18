@@ -21,6 +21,7 @@ build/
 !package.json
 !tsconfig.json
 !vite.config.js
+!vercel.json
 
 # IDE
 .vscode/
