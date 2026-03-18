@@ -126,9 +126,9 @@ export default function SpotifyAppLayout() {
                 <main
                     ref={mainRef}
                     className="flex-1 overflow-y-auto overflow-x-hidden relative"
-                    style={{
-                        paddingBottom: currentEpisode ? '140px' : '40px', // Extra padding if player active
-                    }}
+                style={{
+                    paddingBottom: currentEpisode ? '160px' : '80px', // Extra padding for fixed nav + player
+                }}
                 >
                     <Outlet />
                 </main>
@@ -138,18 +138,20 @@ export default function SpotifyAppLayout() {
             {currentEpisode && <SpotifyPlayerBar />}
 
             {/* MOBILE BOTTOM NAV */}
-            <nav className="md:hidden flex-shrink-0 bg-black border-t border-white/10 z-[110] sticky bottom-0">
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-md border-t border-white/10 z-[110] pb-[env(safe-area-inset-bottom)]">
                 <div className="flex items-center justify-around h-16">
                     {mobileNavItems.map(({ to, label, Icon }) => (
                         <Link
                             key={to}
                             to={to}
-                            className={`flex flex-col items-center justify-center gap-1 px-3 py-2 transition-colors ${
+                            className={`flex flex-col items-center justify-center gap-1.5 flex-1 transition-colors ${
                                 isActive(to) ? 'text-white' : 'text-spotify-subtext'
                             }`}
                         >
-                            <Icon className={`w-6 h-6 ${isActive(to) ? 'stroke-[2.5]' : 'stroke-2'}`} />
-                            <span className="text-[10px] font-normal tracking-wide">{label}</span>
+                            <Icon className={`w-5 h-5 ${isActive(to) ? 'stroke-[2.5]' : 'stroke-2'}`} />
+                            <span className="text-[9px] font-medium tracking-tight truncate w-full text-center px-1">
+                                {label}
+                            </span>
                         </Link>
                     ))}
                 </div>
