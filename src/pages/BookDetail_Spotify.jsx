@@ -8,7 +8,7 @@ import useAudioEngine from '../hooks/useAudioEngine'
 import PaymentModal from '../components/ui/PaymentModal'
 import Skeleton from '../components/ui/Skeleton'
 import { getEpisodeArtwork } from '../lib/media'
-import { Play, Clock, Lock, Plus, MoreHorizontal, Sparkles } from 'lucide-react'
+import { Play, Clock, Lock, MoreHorizontal, Sparkles, Bookmark, BookmarkCheck } from 'lucide-react'
 
 export default function BookDetailSpotify() {
     const { bookId } = useParams()
@@ -21,8 +21,21 @@ export default function BookDetailSpotify() {
     const [loading, setLoading] = useState(true)
     const [showPaymentModal, setShowPaymentModal] = useState(false)
     const [dominantColor, setDominantColor] = useState('#7b5ea7')
-    const [isSaved, setIsSaved] = useState(false)
     const { hasPurchased, hasAccess, refetch } = useBookAccess(bookId)
+    const [showMoreMenu, setShowMoreMenu] = useState(false)
+    const [isBookmarked, setIsBookmarked] = useState(false)
+
+    // Fetch bookmark status
+    useEffect(() => {
+        if (!user || !bookId) return
+        supabase
+            .from('bookmarks')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('book_id', bookId)
+            .maybeSingle()
+            .then(({ data }) => setIsBookmarked(!!data))
+    }, [user, bookId])
 
     const fetchBookDetails = useCallback(async () => {
         try {
@@ -76,9 +89,20 @@ export default function BookDetailSpotify() {
         refetch()
     }
 
-    const toggleSave = () => {
-        setIsSaved(!isSaved)
-        // TODO: Implement actual save to library functionality
+    const toggleSave = async () => {
+        if (!user) return
+        try {
+            if (isBookmarked) {
+                await supabase.from('bookmarks').delete().eq('user_id', user.id).eq('book_id', bookId)
+                setIsBookmarked(false)
+            } else {
+                await supabase.from('bookmarks').insert({ user_id: user.id, book_id: bookId })
+                setIsBookmarked(true)
+            }
+        } catch (err) {
+            console.error('Bookmark error:', err)
+        }
+        setShowMoreMenu(false)
     }
 
     if (loading) {
@@ -174,43 +198,50 @@ export default function BookDetailSpotify() {
                 </div>
             </div>
 
-            {/* Action Bar - Premium Spotify Style */}
+                {/* Action Bar */}
             <div className="px-4 md:px-6 py-8 bg-gradient-to-b from-[#121212] via-[#121212] to-transparent">
                 <div className="max-w-7xl mx-auto flex items-center gap-5">
-                    {/* Large Vibrant Play Button - Primary Focus */}
+                    {/* Play Button */}
                     <button
                         onClick={handlePlayFirst}
                         className="w-14 h-14 md:w-16 md:h-16 bg-[#1DB954] hover:bg-[#1ed760] hover:scale-105 rounded-full flex items-center justify-center shadow-xl transition-all"
                         aria-label="Play audiobook"
-                        style={{
-                            boxShadow: '0 8px 24px rgba(29, 185, 84, 0.4)'
-                        }}
+                        style={{ boxShadow: '0 8px 24px rgba(29, 185, 84, 0.4)' }}
                     >
                         <Play className="w-7 h-7 md:w-8 md:h-8 text-black fill-black ml-0.5" />
                     </button>
 
-                    {/* Save/Plus Button - Secondary Icon */}
-                    <button
-                        onClick={toggleSave}
-                        className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all ${
-                            isSaved 
-                                ? 'text-[#1DB954]' 
-                                : 'text-gray-400 hover:text-white'
-                        }`}
-                        aria-label="Add to library"
-                    >
-                        <Plus className="w-7 h-7 md:w-8 md:h-8" strokeWidth={2} />
-                    </button>
+                    {/* More Options (3-dot) with Dropdown */}
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowMoreMenu(v => !v)}
+                            className="w-10 h-10 md:w-12 md:h-12 text-gray-400 hover:text-white rounded-full flex items-center justify-center transition-all"
+                            aria-label="More options"
+                        >
+                            <MoreHorizontal className="w-7 h-7 md:w-8 md:h-8" strokeWidth={2} />
+                        </button>
 
-                    {/* More Options Button - Secondary Icon */}
-                    <button
-                        className="w-10 h-10 md:w-12 md:h-12 text-gray-400 hover:text-white rounded-full flex items-center justify-center transition-all"
-                        aria-label="More options"
-                    >
-                        <MoreHorizontal className="w-7 h-7 md:w-8 md:h-8" strokeWidth={2} />
-                    </button>
+                        {/* Dropdown Menu */}
+                        {showMoreMenu && (
+                            <>
+                                {/* Backdrop */}
+                                <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
+                                <div className="absolute left-0 top-14 z-50 bg-[#282828] rounded-lg shadow-2xl border border-white/10 py-1 min-w-[200px]">
+                                    <button
+                                        onClick={toggleSave}
+                                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 transition-colors text-sm text-white"
+                                    >
+                                        {isBookmarked
+                                            ? <BookmarkCheck className="w-4 h-4 text-[#1DB954]" />
+                                            : <Bookmark className="w-4 h-4" />}
+                                        {isBookmarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
 
-                    {/* Unlock Button (if premium and not purchased) */}
+                    {/* Unlock Button */}
                     {book.is_premium && !hasPurchased && (
                         <button
                             onClick={handleUnlockClick}

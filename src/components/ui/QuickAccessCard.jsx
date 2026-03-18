@@ -6,11 +6,7 @@ export default function QuickAccessCard({ book, episode, progress: _progress = 0
     const navigate = useNavigate()
 
     const handleClick = () => {
-        if (episode) {
-            navigate(`/book/${book.id}/episode/${episode.id}`)
-        } else {
-            navigate(`/book/${book.id}`)
-        }
+        navigate(`/book/${book.id}`)
     }
 
     return (

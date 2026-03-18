@@ -9,7 +9,7 @@ import SpotifyBookCard from '../components/ui/SpotifyBookCard'
 import QuickAccessCard from '../components/ui/QuickAccessCard'
 import FeaturedCarousel from '../components/ui/FeaturedCarousel'
 import Skeleton from '../components/ui/Skeleton'
-import { TrendingUp, Library, Bell } from 'lucide-react'
+import { TrendingUp, Bell } from 'lucide-react'
 
 export default function Home() {
     const { user } = useAuth()
@@ -174,17 +174,11 @@ export default function Home() {
                 </div>
             )}
 
-            {/* Featured Carousel - TOP SECTION */}
-            {featuredBooks.length > 0 && (
-                <div className="px-4 md:px-6 mb-16">
-                    <FeaturedCarousel books={featuredBooks.slice(0, 5)} />
-                </div>
-            )}
-
-            {/* Quick Access Grid (Recently Played - 6 cards) */}
+            {/* Jump Back In - TOP (if we have progress data) */}
             {continueListening.length > 0 && (
-                <div className="px-4 md:px-6 mb-16">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="px-4 md:px-6 mb-8">
+                    <h2 className="text-xl font-bold text-white mb-4">Jump Back In</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {continueListening.slice(0, 6).map((item) => (
                             <QuickAccessCard
                                 key={item.episode_id}
@@ -197,35 +191,19 @@ export default function Home() {
                 </div>
             )}
 
+            {/* Featured Carousel */}
+            {featuredBooks.length > 0 && (
+                <div className="px-4 md:px-6 mb-16">
+                    <FeaturedCarousel books={featuredBooks.slice(0, 5)} />
+                </div>
+            )}
+
             {/* Trending Now Shelf */}
             {featuredBooks.length > 0 && (
                 <HorizontalShelf title="Trending Now" icon={TrendingUp}>
                     {featuredBooks.map((book) => (
                         <div key={book.id} className="w-[150px] sm:w-[180px] flex-shrink-0">
                             <SpotifyBookCard book={book} />
-                        </div>
-                    ))}
-                </HorizontalShelf>
-            )}
-
-
-            {/* Top Audiobooks Shelf */}
-            {regularBooks.length > 0 && (
-                <HorizontalShelf title="Top Audiobooks" icon={Library}>
-                    {regularBooks.map((book) => (
-                        <div key={book.id} className="w-[150px] sm:w-[180px] flex-shrink-0">
-                            <SpotifyBookCard book={book} />
-                        </div>
-                    ))}
-                </HorizontalShelf>
-            )}
-
-            {/* Jump Back In (if we have progress data) */}
-            {continueListening.length > 0 && (
-                <HorizontalShelf title="Jump Back In">
-                    {continueListening.map((item) => (
-                        <div key={item.episode_id} className="w-[150px] sm:w-[180px] flex-shrink-0">
-                            <SpotifyBookCard book={item.book} showPlayButton={true} />
                         </div>
                     ))}
                 </HorizontalShelf>
