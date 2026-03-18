@@ -6,6 +6,7 @@ import { getUserDownloads, deleteDownload } from '../lib/downloads'
 import { fetchUserListenProgress } from '../lib/listening'
 import { getEpisodeArtwork } from '../lib/media'
 import { User, Download, Clock, Play, Trash2, LogOut } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 
 export default function Profile() {
     const { user, profile } = useAuth()
@@ -44,8 +45,9 @@ export default function Profile() {
 
     const handleLogout = async () => {
         if (window.confirm('Are you sure you want to log out?')) {
-            await actions.logout()
-            window.location.replace('/')
+            await supabase.auth.signOut()   // ← clears the Supabase session cookie
+            actions.logout()                // ← clears local Zustand store
+            window.location.replace('/')    // ← go to landing page
         }
     }
 
