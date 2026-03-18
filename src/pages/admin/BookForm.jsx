@@ -290,6 +290,7 @@ export default function BookForm() {
                         >
                             <option value="English">English</option>
                             <option value="Hindi">Hindi</option>
+                            <option value="Kannada">Kannada</option>
                             <option value="Tamil">Tamil</option>
                             <option value="Telugu">Telugu</option>
                         </select>
