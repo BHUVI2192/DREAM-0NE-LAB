@@ -9,8 +9,8 @@ export default function AppLayout() {
     const currentEpisode = usePlayerStore((s) => s.currentEpisode)
     const { user, profile, actions } = useAuthStore()
 
-    // Use email for admin check (matches useAuth.js logic)
-    const isAdmin = user?.email === 'cnbhuvan011@gmail.com'
+    // Use role for admin check (matches useAuth.js logic)
+    const isAdmin = profile?.role === 'admin'
 
     const navItems = [
         { to: '/home', label: 'Home', Icon: Home },

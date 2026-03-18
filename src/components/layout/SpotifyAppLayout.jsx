@@ -12,8 +12,8 @@ export default function SpotifyAppLayout() {
     const [headerOpacity, setHeaderOpacity] = useState(0)
     const mainRef = useRef(null)
 
-    // Use email for admin check
-    const isAdmin = user?.email === 'cnbhuvan011@gmail.com'
+    // Use role for admin check
+    const isAdmin = profile?.role === 'admin'
 
 
 
