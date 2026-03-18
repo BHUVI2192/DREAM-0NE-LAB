@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { X, CheckCircle2 } from 'lucide-react'
-import { supabase } from '../../lib/supabase'
+import { createPurchase, markPurchaseSuccess } from '../../lib/purchases'
 import useAuth from '../../hooks/useAuth'
 import Modal from './Modal'
 
@@ -47,18 +47,14 @@ export default function PaymentModal({ bookId, isOpen, onClose, onSuccess }) {
 
         try {
             // Step 1: Create purchases row with pending status
-            const { data: purchase, error: purchaseError } = await supabase
-                .from('purchases')
-                .insert({
-                    user_id: user.id,
-                    book_id: bookId,
-                    amount_inr: price,
-                    payment_status: 'pending',
-                    payment_ref: `DL${Date.now()}${Math.random().toString(36).substr(2, 9)}`,
-                    is_special: false
-                })
-                .select()
-                .single()
+            const { data: purchase, error: purchaseError } = await createPurchase({
+                userId: user.id,
+                bookId,
+                amount: price,
+                paymentRef: `DL${Date.now()}${Math.random().toString(36).substr(2, 9)}`,
+                purchaseType: 'book',
+                isSpecial: false,
+            })
 
             if (purchaseError) throw purchaseError
 
@@ -66,10 +62,7 @@ export default function PaymentModal({ bookId, isOpen, onClose, onSuccess }) {
             await new Promise(resolve => setTimeout(resolve, 2000))
 
             // Step 3: Update purchase to success
-            const { error: updateError } = await supabase
-                .from('purchases')
-                .update({ payment_status: 'success' })
-                .eq('id', purchase.id)
+            const { error: updateError } = await markPurchaseSuccess(purchase.id)
 
             if (updateError) throw updateError
 

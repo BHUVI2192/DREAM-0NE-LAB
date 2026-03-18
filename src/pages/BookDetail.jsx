@@ -1,30 +1,28 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import useAuth from '../hooks/useAuth'
-import useBookAccess from '../hooks/useBookAccess'
+import usePlayerStore from '../store/playerStore'
 import AppLayout from '../components/layout/AppLayout'
 import EpisodeRow from '../components/ui/EpisodeRow'
-import PaymentModal from '../components/ui/PaymentModal'
 import Skeleton from '../components/ui/Skeleton'
-import { Clock } from 'lucide-react'
+import { Clock, Bookmark, BookmarkCheck, Download } from 'lucide-react'
+import { toggleBookmark, checkIsBookmarked } from '../lib/bookmarks'
+import { downloadEpisode } from '../lib/downloads'
 
 export default function BookDetail() {
     const { bookId } = useParams()
     const { user } = useAuth()
     const navigate = useNavigate()
+    const { actions: playerActions } = usePlayerStore()
     const [book, setBook] = useState(null)
     const [episodes, setEpisodes] = useState([])
     const [loading, setLoading] = useState(true)
-    const [showPaymentModal, setShowPaymentModal] = useState(false)
     const [showFullBlurb, setShowFullBlurb] = useState(false)
-    const { hasPurchased, isLoading: purchaseLoading, refetch } = useBookAccess(bookId)
+    const [isBookmarked, setIsBookmarked] = useState(false)
+    const [downloadingSeries, setDownloadingSeries] = useState(false)
 
-    useEffect(() => {
-        fetchBookDetails()
-    }, [bookId])
-
-    const fetchBookDetails = async () => {
+    const fetchBookDetails = useCallback(async () => {
         try {
             const { data: bookData } = await supabase
                 .from('books')
@@ -40,28 +38,65 @@ export default function BookDetail() {
 
             setBook(bookData)
             setEpisodes(episodesData || [])
+            
+            if (user) {
+                const bookmarked = await checkIsBookmarked(user.id, bookId)
+                setIsBookmarked(bookmarked)
+            }
         } catch (err) {
             console.error('Error fetching book details:', err)
         } finally {
             setLoading(false)
         }
-    }
+    }, [bookId])
+
+    useEffect(() => {
+        fetchBookDetails()
+    }, [fetchBookDetails])
 
     const handlePlayEpisode = (episode) => {
-        // Navigate to player (Phase 5 implementation)
-        navigate(`/book/${bookId}/episode/${episode.id}`)
+        // Set current episode in player store and start playback
+        playerActions.setCurrentEpisode(episode, book)
+        playerActions.play()
     }
 
-    const handleUnlockClick = () => {
+    const handleBookmarkToggle = async () => {
         if (!user) {
             navigate('/login')
             return
         }
-        setShowPaymentModal(true)
+        const result = await toggleBookmark(user.id, book.id)
+        if (result.success) {
+            setIsBookmarked(result.bookmarked)
+        }
     }
 
-    const handlePaymentSuccess = () => {
-        refetch() // Refetch purchase status
+    const handleDownloadEpisode = async (episode, setProgress) => {
+        if (!user) {
+            navigate('/login')
+            return
+        }
+        await downloadEpisode(episode.id, book.id, episode.audio_url, episode.title, setProgress)
+    }
+
+    const handleDownloadSeries = async () => {
+        if (!user) {
+            navigate('/login')
+            return
+        }
+        setDownloadingSeries(true)
+        // Download sequentially to avoid browser issues
+        try {
+            for (const episode of episodes) {
+                await downloadEpisode(episode.id, book.id, episode.audio_url, episode.title, null)
+            }
+            alert('Series downloaded successfully!')
+        } catch (err) {
+            console.error(err)
+            alert('An error occurred during download.')
+        } finally {
+            setDownloadingSeries(false)
+        }
     }
 
     if (loading) {
@@ -157,38 +192,44 @@ export default function BookDetail() {
                             </div>
                         )}
 
-                        {/* Pricing & CTA */}
+                        {/* CTA */}
                         <div className="pt-4">
                             {!user ? (
                                 <div className="space-y-3">
-                                    <div className="text-text-secondary text-sm">
-                                        {freeEpisodeCount} free episodes · ₹49 to unlock all
-                                    </div>
                                     <button
                                         onClick={() => navigate('/login')}
-                                        className="px-8 py-3 bg-accent text-white rounded-xl font-bold hover:bg-accent/90 transition-colors"
+                                        className="px-8 py-3 bg-white text-black rounded-full font-bold hover:scale-105 transition-transform"
                                     >
                                         Sign in to listen
                                     </button>
                                 </div>
-                            ) : purchaseLoading ? (
-                                <div className="text-text-muted">Loading...</div>
-                            ) : hasPurchased ? (
-                                <div className="flex items-center gap-2 text-green-400">
-                                    <span className="text-2xl">✅</span>
-                                    <span>All episodes unlocked</span>
-                                </div>
                             ) : (
-                                <div className="space-y-3">
-                                    <div className="text-text-secondary text-sm">
-                                        {freeEpisodeCount} free · ₹49 for all {totalEpisodes} episodes
-                                    </div>
-                                    <button
-                                        onClick={handleUnlockClick}
-                                        className="px-8 py-3 bg-accent text-white rounded-xl font-bold hover:bg-accent/90 transition-colors"
+                                <div className="flex flex-col sm:flex-row gap-4 items-center">
+                                     <button
+                                        onClick={() => handlePlayEpisode(episodes[0])}
+                                        className="px-8 py-3 bg-spotify-green text-black rounded-full font-bold hover:scale-105 transition-transform"
                                     >
-                                        Unlock for ₹49
+                                        Listen Now
                                     </button>
+
+                                    <div className="flex items-center gap-3">
+                                        <button
+                                            onClick={handleBookmarkToggle}
+                                            className="w-12 h-12 flex items-center justify-center rounded-full border border-white/30 text-white hover:border-white transition-colors"
+                                            title={isBookmarked ? "Remove Bookmark" : "Add Bookmark"}
+                                        >
+                                            {isBookmarked ? <BookmarkCheck className="w-6 h-6 text-spotify-green" /> : <Bookmark className="w-5 h-5 fill-transparent" />}
+                                        </button>
+                                        
+                                        <button
+                                            onClick={handleDownloadSeries}
+                                            disabled={downloadingSeries}
+                                            className="w-12 h-12 flex items-center justify-center rounded-full border border-white/30 text-white hover:border-white transition-colors disabled:opacity-50"
+                                            title="Download Series"
+                                        >
+                                            <Download className={`w-5 h-5 ${downloadingSeries ? 'animate-bounce text-accent' : ''}`} />
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -200,14 +241,13 @@ export default function BookDetail() {
                     <h2 className="font-display text-2xl text-white">Episodes</h2>
                     <div className="space-y-3">
                         {episodes.map((episode) => {
-                            const isLocked = !episode.is_free && !hasPurchased
                             return (
                                 <EpisodeRow
                                     key={episode.id}
                                     episode={episode}
-                                    isLocked={isLocked}
+                                    isLocked={false}
                                     onPlay={handlePlayEpisode}
-                                    onUnlock={handleUnlockClick}
+                                    onDownload={handleDownloadEpisode}
                                     currentlyPlaying={null}
                                 />
                             )
@@ -221,14 +261,6 @@ export default function BookDetail() {
                     )}
                 </div>
             </div>
-
-            {/* Payment Modal */}
-            <PaymentModal
-                bookId={bookId}
-                isOpen={showPaymentModal}
-                onClose={() => setShowPaymentModal(false)}
-                onSuccess={handlePaymentSuccess}
-            />
         </AppLayout>
     )
 }

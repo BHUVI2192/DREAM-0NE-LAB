@@ -1,102 +1,190 @@
-import { useEffect } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 import useAuthStore from './store/authStore'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import AdminRoute from './components/auth/AdminRoute'
 
-// Layouts
-import AppLayout from './components/layout/AppLayout'
-import AdminLayout from './components/layout/AdminLayout'
+const AppLayout = lazy(() => import('./components/layout/SpotifyAppLayout'))
+const AdminLayout = lazy(() => import('./components/layout/AdminLayout'))
 
-// Public pages
-import Landing from './pages/Landing'
-import Login from './pages/Login'
-import Signup from './pages/Signup'
-import SeedData from './pages/SeedData'
+const Landing = lazy(() => import('./pages/Landing'))
+const Login = lazy(() => import('./pages/Login'))
+const Signup = lazy(() => import('./pages/Signup'))
+const SeedData = lazy(() => import('./pages/SeedData'))
 
-// Protected pages
-import Home from './pages/Home'
-import Library from './pages/Library'
-import BookDetail from './pages/BookDetail'
-import Player from './pages/Player'
-import Profile from './pages/Profile'
-import PaymentResult from './pages/PaymentResult'
-import Support from './pages/Support'
+const Home = lazy(() => import('./pages/Home_Spotify'))
+const Search = lazy(() => import('./pages/Search_Spotify'))
+const Bookmarks = lazy(() => import('./pages/Bookmarks'))
+const BookDetail = lazy(() => import('./pages/BookDetail_Spotify'))
+const Player = lazy(() => import('./pages/Player'))
+const Profile = lazy(() => import('./pages/Profile'))
+const PaymentResult = lazy(() => import('./pages/PaymentResult'))
+const Support = lazy(() => import('./pages/Support'))
+const Subscription = lazy(() => import('./pages/Subscription'))
 
-// Admin pages
-import AdminDashboard from './pages/admin/Dashboard'
-import AdminBooks from './pages/admin/Books'
-import BookForm from './pages/admin/BookForm'
-import Episodes from './pages/admin/Episodes'
-import AdminSetup from './pages/admin/AdminSetup'
-import AdminSettings from './pages/admin/Settings'
-import AdminUsers from './pages/admin/Users'
-import AdminAlerts from './pages/admin/Alerts'
+const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'))
+const AdminBooks = lazy(() => import('./pages/admin/Books'))
+const BookForm = lazy(() => import('./pages/admin/BookForm'))
+const Episodes = lazy(() => import('./pages/admin/Episodes'))
+const AdminSetup = lazy(() => import('./pages/admin/AdminSetup'))
+const AdminUsers = lazy(() => import('./pages/admin/Users'))
+const AdminAlerts = lazy(() => import('./pages/admin/Alerts'))
+
+function isTransientNetworkError(error) {
+    const message = `${error?.message || ''} ${error?.name || ''} ${error?.code || ''}`.toLowerCase()
+
+    return (
+        (typeof navigator !== 'undefined' && navigator.onLine === false) ||
+        message.includes('failed to fetch') ||
+        message.includes('network') ||
+        message.includes('fetch') ||
+        message.includes('timeout') ||
+        message.includes('address unreachable')
+    )
+}
+
+function formatAuthBootstrapMessage(scope, error) {
+    if (isTransientNetworkError(error)) {
+        return scope === 'profile'
+            ? 'Signed in, but Dream Lab could not refresh your account details. Some account-dependent features may be stale until the connection returns.'
+            : 'Dream Lab could not reach Supabase to verify your session. Check the connection and retry.'
+    }
+
+    return scope === 'profile'
+        ? 'Dream Lab could not load your account details. Some account-dependent features may be unavailable until retry.'
+        : 'Dream Lab could not verify your session. Retry to continue.'
+}
 
 export default function App() {
     const { actions } = useAuthStore()
 
+    const fallback = (
+        <div className="min-h-screen flex items-center justify-center bg-bg-primary text-text-muted">
+            Loading...
+        </div>
+    )
+
     useEffect(() => {
+        let isActive = true
+
+        const setBootstrapError = (scope, error) => {
+            if (!isActive) return
+
+            actions.setAuthError({
+                scope,
+                message: formatAuthBootstrapMessage(scope, error),
+                isNetworkError: isTransientNetworkError(error),
+            })
+            actions.setLoading(false)
+        }
+
         const handleSession = async (session) => {
             const user = session?.user ?? null
+
+            if (!isActive) return
+
             actions.setUser(user)
+            actions.clearAuthError()
 
             if (user) {
-                const { data: profile, error } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', user.id)
-                    .single()
-
-                if (error && error.code === 'PGRST116') {
-                    const isPhoneUser = user.user_metadata?.is_phone_user
-                    const phone = isPhoneUser ? user.user_metadata?.phone_number : (user.phone ?? '')
-                    const email = isPhoneUser ? '' : (user.email ?? '')
-                    const full_name = user.user_metadata?.full_name ?? ''
-
-                    const { data: newProfile } = await supabase
+                try {
+                    const { data: profile, error } = await supabase
                         .from('profiles')
-                        .insert({
-                            id: user.id,
-                            phone,
-                            email,
-                            full_name
-                        })
-                        .select()
+                        .select('*')
+                        .eq('id', user.id)
                         .single()
-                    actions.setProfile(newProfile ?? null)
-                } else {
-                    actions.setProfile(profile ?? null)
+
+                    if (error && error.code === 'PGRST116') {
+                        const isPhoneUser = user.user_metadata?.is_phone_user
+                        const phone = isPhoneUser ? user.user_metadata?.phone_number : (user.phone ?? '')
+                        const email = isPhoneUser ? '' : (user.email ?? '')
+                        const full_name = user.user_metadata?.full_name ?? ''
+
+                        const { data: newProfile, error: insertError } = await supabase
+                            .from('profiles')
+                            .insert({
+                                id: user.id,
+                                phone,
+                                email,
+                                full_name
+                            })
+                            .select()
+                            .single()
+
+                        if (insertError) {
+                            throw insertError
+                        }
+
+                        if (!isActive) return
+                        actions.setProfile(newProfile ?? null)
+                    } else if (error) {
+                        throw error
+                    } else {
+                        if (!isActive) return
+                        actions.setProfile(profile ?? null)
+                    }
+                } catch (error) {
+                    console.error('Error loading auth profile:', error)
+                    setBootstrapError('profile', error)
+                    return
                 }
             } else {
                 actions.setProfile(null)
             }
 
+            if (!isActive) return
             actions.setLoading(false)
         }
 
-        supabase.auth.getSession()
-            .then(({ data: { session } }) => handleSession(session))
-            .catch(() => {
-                actions.setUser(null)
-                actions.setLoading(false)
-            })
+        const bootstrapAuth = async (sessionOverride) => {
+            if (!isActive) return
+
+            actions.setLoading(true)
+
+            try {
+                if (sessionOverride !== undefined) {
+                    await handleSession(sessionOverride)
+                    return
+                }
+
+                const { data: { session } } = await supabase.auth.getSession()
+                await handleSession(session)
+            } catch (error) {
+                console.error('Error bootstrapping auth session:', error)
+                setBootstrapError('session', error)
+            }
+        }
+
+        void bootstrapAuth()
 
         const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
             if (event === 'SIGNED_OUT') {
                 actions.logout()
             } else {
-                handleSession(session)
+                void bootstrapAuth(session)
             }
         })
 
-        return () => listener.subscription.unsubscribe()
-    }, [])
+        const retryBootstrap = () => {
+            void bootstrapAuth()
+        }
+
+        window.addEventListener('online', retryBootstrap)
+        window.addEventListener('dreamlab:retry-auth-bootstrap', retryBootstrap)
+
+        return () => {
+            isActive = false
+            listener.subscription.unsubscribe()
+            window.removeEventListener('online', retryBootstrap)
+            window.removeEventListener('dreamlab:retry-auth-bootstrap', retryBootstrap)
+        }
+    }, [actions])
 
     return (
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <Routes>
+            <Suspense fallback={fallback}>
+                <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
@@ -110,15 +198,42 @@ export default function App() {
                     }
                 >
                     <Route path="/home" element={<Home />} />
-                    <Route path="/library" element={<Library />} />
+                    <Route path="/search" element={<Search />} />
+                    <Route path="/bookmarks" element={<Bookmarks />} />
                     <Route path="/book/:bookId" element={<BookDetail />} />
-                    <Route path="/book/:bookId/episode/:epId" element={<Player />} />
-                    <Route path="/player" element={<Player />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/support" element={<Support />} />
                     <Route path="/payment/result" element={<PaymentResult />} />
                     <Route path="/payment/callback" element={<PaymentResult />} />
                 </Route>
+
+                {/* Subscription Page - Full screen */}
+                <Route
+                    path="/subscription"
+                    element={
+                        <ProtectedRoute>
+                            <Subscription />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* Full-screen Player (outside AppLayout for immersive experience) */}
+                <Route
+                    path="/book/:bookId/episode/:epId"
+                    element={
+                        <ProtectedRoute>
+                            <Player />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/player"
+                    element={
+                        <ProtectedRoute>
+                            <Player />
+                        </ProtectedRoute>
+                    }
+                />
 
                 <Route
                     element={
@@ -134,12 +249,12 @@ export default function App() {
                     <Route path="/admin/books/:id/episodes" element={<Episodes />} />
                     <Route path="/admin/users" element={<AdminUsers />} />
                     <Route path="/admin/alerts" element={<AdminAlerts />} />
-                    <Route path="/admin/settings" element={<AdminSettings />} />
                 </Route>
 
                 <Route path="/admin-setup" element={<AdminSetup />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+                </Routes>
+            </Suspense>
         </BrowserRouter>
     )
 }

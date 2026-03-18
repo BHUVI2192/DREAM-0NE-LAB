@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { fetchSuccessfulPurchases } from '../lib/purchases'
+import { fetchActiveSubscription, isMissingSubscriptionsTableError } from '../lib/subscriptions'
 import { BookOpen } from 'lucide-react'
 import useAuth from '../hooks/useAuth'
 
@@ -9,26 +11,56 @@ export default function Library() {
     const [books, setBooks] = useState([])
     const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        fetchLibrary()
-    }, [user])
-
-    const fetchLibrary = async () => {
+    const fetchLibrary = useCallback(async () => {
         try {
-            const { data, error } = await supabase
-                .from('books')
-                .select('*')
-                .eq('is_published', true)
-                .order('created_at', { ascending: false })
+            if (!user) {
+                setBooks([])
+                return
+            }
 
-            if (error) throw error
-            setBooks(data || [])
+            const [{ data: allBooks, error: booksError }, { data: purchases }] = await Promise.all([
+                supabase
+                    .from('books')
+                    .select('*')
+                    .eq('is_published', true)
+                    .order('created_at', { ascending: false }),
+                fetchSuccessfulPurchases({
+                    select: 'book_id',
+                    filters: [{ column: 'user_id', value: user.id }],
+                })
+            ])
+
+            if (booksError) throw booksError
+
+            let hasSubscription = false
+            const subResponse = await fetchActiveSubscription(user.id)
+
+            if (!subResponse.error) {
+                hasSubscription = !!subResponse.data
+            } else if (!isMissingSubscriptionsTableError(subResponse.error)) {
+                console.error('Error fetching active subscription:', subResponse.error)
+            }
+
+            const purchasedIds = new Set((purchases || []).map((row) => row.book_id).filter(Boolean))
+
+            const accessibleBooks = (allBooks || []).filter((book) => {
+                if (purchasedIds.has(book.id)) return true
+                if (hasSubscription && !book.is_premium) return true
+                return false
+            })
+
+            setBooks(accessibleBooks)
         } catch (err) {
             console.error('Error fetching library:', err)
+            setBooks([])
         } finally {
             setLoading(false)
         }
-    }
+    }, [user])
+
+    useEffect(() => {
+        fetchLibrary()
+    }, [fetchLibrary])
 
     if (loading) {
         return (

@@ -7,17 +7,32 @@ export default {
   theme: {
     extend: {
       colors: {
-        'bg-primary': '#0A0A0F',
-        'bg-secondary': '#13131A',
-        'bg-elevated': '#1A1A24',
-        'text-primary': '#FFFFFF',
-        'text-secondary': '#B4B4C6',
-        'text-muted': '#6B6B7B',
-        'accent': '#7b5ea7',
-        'border-subtle': '#2A2A3C',
+        // Spotify-style dark theme
+        'spotify-black': '#000000',
+        'spotify-base': '#121212',
+        'spotify-elevated': '#1a1a1a',
+        'spotify-highlight': '#282828',
+        'spotify-text': '#ffffff',
+        'spotify-subtext': '#b3b3b3',
+        'spotify-muted': '#6a6a6a',
+        'spotify-purple': '#7b5ea7',
+        'spotify-bright-purple': '#8b6dc7',
+        'spotify-green': '#1ed760',
       },
       fontFamily: {
-        'display': ['Inter', 'sans-serif'],
+        'sans': ['Inter', 'Circular', 'system-ui', 'sans-serif'],
+      },
+      fontSize: {
+        '2xs': ['0.625rem', { lineHeight: '0.875rem' }],
+      },
+      animation: {
+        'slide-up': 'slide-up 0.3s ease-out',
+      },
+      keyframes: {
+        'slide-up': {
+          '0%': { transform: 'translateY(100%)' },
+          '100%': { transform: 'translateY(0)' },
+        },
       },
     },
   },

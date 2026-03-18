@@ -156,7 +156,7 @@ async function seedDatabase() {
                 audio_url: `https://example.com/audio/${book.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}-ep${ep.episode_number}.mp3`
             }))
 
-            const { data: episodesResult, error: episodesError } = await supabase
+                const { error: episodesError } = await supabase
                 .from('episodes')
                 .insert(episodesWithBookId)
 

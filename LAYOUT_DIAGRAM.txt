@@ -1,0 +1,255 @@
+/*
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     SPOTIFY-STYLE LAYOUT DIAGRAM                             │
+│                        Dream Lab Audiobook App                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                           DESKTOP LAYOUT (> 768px)                         ║
+╠═══════════════════════════════════════════════════════════════════════════╣
+║                                                                            ║
+║  ┌──────────────┬──────────────────────────────────────────────────────┐ ║
+║  │              │                                                       │ ║
+║  │  Dream Lab   │  Good afternoon                                      │ ║
+║  │  ──────────  │  ═══════════════                                     │ ║
+║  │              │                                                       │ ║
+║  │  🏠 Home     │  ┌───────┐ ┌───────┐ ┌───────┐                      │ ║
+║  │  📚 Library  │  │   1   │ │   2   │ │   3   │  Quick Access        │ ║
+║  │  👤 Profile  │  │ Book  │ │ Book  │ │ Book  │  (Recently Played)   │ ║
+║  │  🛡️  Admin   │  └───────┘ └───────┘ └───────┘                      │ ║
+║  │              │  ┌───────┐ ┌───────┐ ┌───────┐                      │ ║
+║  │              │  │   4   │ │   5   │ │   6   │                      │ ║
+║  │              │  │ Book  │ │ Book  │ │ Book  │                      │ ║
+║  │              │  └───────┘ └───────┘ └───────┘                      │ ║
+║  │              │                                                       │ ║
+║  │              │  📈 Trending Now                      ← →            │ ║
+║  │              │  ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐           │ ║
+║  │              │  │  │ │  │ │  │ │  │ │  │ │  │ │  │ │  │ →→→→     │ ║
+║  │              │  └──┘ └──┘ └──┘ └──┘ └──┘ └──┘ └──┘ └──┘           │ ║
+║  │              │                                                       │ ║
+║  │              │  ┌──────────────────────────────────────────────┐   │ ║
+║  │              │  │ 👑 PREMIUM • Unlock All Books • ₹49/month   │   │ ║
+║  │              │  │ ✓ Unlimited  ✓ Offline  ✓ Cancel anytime   │   │ ║
+║  │              │  │                          [Upgrade Now]       │   │ ║
+║  │              │  └──────────────────────────────────────────────┘   │ ║
+║  │              │                                                       │ ║
+║  │              │  ✨ Premium Series                   ← →            │ ║
+║  │              │  ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐                          │ ║
+║  │              │  │  │ │  │ │  │ │  │ │  │ →→→→→→→                 │ ║
+║  │              │  └──┘ └──┘ └──┘ └──┘ └──┘                          │ ║
+║  │              │                                                       │ ║
+║  │              │  📚 Top Audiobooks                   ← →            │ ║
+║  └─────────┬────┤  ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐                          │ ║
+║  │  Avatar │    │  │  │ │  │ │  │ │  │ │  │ →→→→→→→                 │ ║
+║  │  User   │    │  └──┘ └──┘ └──┘ └──┘ └──┘                          │ ║
+║  │  email  │    │                                                       │ ║
+║  └─────────┴────┴──────────────────────────────────────────────────────┘ ║
+║  ┌───────────────────────────────────────────────────────────────────┐   ║
+║  │ [Cover] Book Title    ◁   ⏮  ▶  ⏭  ▷   [1.0x] [────○────] 🔊   │   ║
+║  │         Author        0:45 ════⚬══════════════ 12:34              │   ║
+║  └───────────────────────────────────────────────────────────────────┘   ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                           MOBILE LAYOUT (< 768px)                          ║
+╠═══════════════════════════════════════════════════════════════════════════╣
+║                                                                            ║
+║  ┌──────────────────────────────────────────────────────────────────┐    ║
+║  │  Good afternoon                                                   │    ║
+║  │  ═══════════════                                                  │    ║
+║  │                                                                    │    ║
+║  │  ┌──────────────────────┐                                        │    ║
+║  │  │ [Cover] Book Title   │  Quick Access (1 column)               │    ║
+║  │  │         Episode      │                                         │    ║
+║  │  └──────────────────────┘                                        │    ║
+║  │  ┌──────────────────────┐                                        │    ║
+║  │  │ [Cover] Book Title   │                                         │    ║
+║  │  │         Episode      │                                         │    ║
+║  │  └──────────────────────┘                                        │    ║
+║  │                                                                    │    ║
+║  │  📈 Trending Now                                                  │    ║
+║  │  ┌───┐ ┌───┐ ┌───┐ ┌───┐ →→→→                                  │    ║
+║  │  │   │ │   │ │   │ │   │                                        │    ║
+║  │  └───┘ └───┘ └───┘ └───┘                                        │    ║
+║  │                                                                    │    ║
+║  │  ┌─────────────────────────────────────┐                         │    ║
+║  │  │ 👑 PREMIUM                          │                         │    ║
+║  │  │ Unlock All • ₹49/month             │                         │    ║
+║  │  │                     [Upgrade]       │                         │    ║
+║  │  └─────────────────────────────────────┘                         │    ║
+║  │                                                                    │    ║
+║  │  ✨ Premium Series                                               │    ║
+║  │  ┌───┐ ┌───┐ ┌───┐ →→→→                                        │    ║
+║  │  │   │ │   │ │   │                                              │    ║
+║  │  └───┘ └───┘ └───┘                                              │    ║
+║  │                                                                    │    ║
+║  └────────────────────────────────────────────────────────────────┬─┘    ║
+║  ┌────────────────────────────────────────────────────────────────┘      ║
+║  │ [Cover] Book      ◁  ⏮  ▶  ⏭  ▷                                │      ║
+║  │         Author    0:45 ══⚬════════ 12:34                         │      ║
+║  └──────────────────────────────────────────────────────────────────┘      ║
+║  ┌──────────────────────────────────────────────────────────────────┐      ║
+║  │  🏠 Home    📚 Library    👤 Profile    🛡️ Admin              │      ║
+║  └──────────────────────────────────────────────────────────────────┘      ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                        BOOK DETAIL PAGE LAYOUT                             ║
+╠═══════════════════════════════════════════════════════════════════════════╣
+║                                                                            ║
+║  ┌──────────────────────────────────────────────────────────────────┐    ║
+║  │  ╔══════════════════════════════════════════════════════════╗    │    ║
+║  │  ║               HERO SECTION (Gradient Background)         ║    │    ║
+║  │  ║                                                           ║    │    ║
+║  │  ║  ┌────────────┐                                          ║    │    ║
+║  │  ║  │            │   👑 Premium  Audiobook                  ║    │    ║
+║  │  ║  │   Book     │   ═══════════════════════                ║    │    ║
+║  │  ║  │   Cover    │   BOOK TITLE                             ║    │    ║
+║  │  ║  │   (Large)  │   (Huge 4xl-6xl font)                    ║    │    ║
+║  │  ║  │            │                                           ║    │    ║
+║  │  ║  │            │   Author • 24 episodes • 12h 34m          ║    │    ║
+║  │  ║  │            │   Description preview...                  ║    │    ║
+║  │  ║  └────────────┘                                          ║    │    ║
+║  │  ║                                                           ║    │    ║
+║  │  ╚══════════════════════════════════════════════════════════╝    │    ║
+║  │                                                                    │    ║
+║  │  ⭕ [Play]  [Unlock • ₹99]                                       │    ║
+║  │                                                                    │    ║
+║  │  Episodes                                                          │    ║
+║  │  ┌─────────────────────────────────────────────────────────┐     │    ║
+║  │  │ #  Title                    Description       Duration   │     │    ║
+║  │  ├─────────────────────────────────────────────────────────┤     │    ║
+║  │  │ 1  Episode Title 1          Short desc...      12:34    │     │    ║
+║  │  │ 2  Episode Title 2          Short desc...      15:20    │     │    ║
+║  │  │ 3  Episode Title 3 [FREE]   Short desc...      10:45    │     │    ║
+║  │  │ 4  Episode Title 4          Short desc...      18:12    │     │    ║
+║  │  │ 5  Episode Title 5 🔒       Short desc...      14:30    │     │    ║
+║  │  └─────────────────────────────────────────────────────────┘     │    ║
+║  │                                                                    │    ║
+║  │  About this audiobook                                              │    ║
+║  │  Full description text here...                                     │    ║
+║  │                                                                    │    ║
+║  └────────────────────────────────────────────────────────────────────┘    ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                          COMPONENT BREAKDOWN                               ║
+╠═══════════════════════════════════════════════════════════════════════════╣
+║                                                                            ║
+║  1. SpotifyAppLayout                                                      ║
+║     │                                                                      ║
+║     ├── Sidebar (Desktop only)                                            ║
+║     │   ├── Logo                                                          ║
+║     │   ├── Navigation Links (Home, Library, Profile, Admin)             ║
+║     │   └── User Profile Card                                              ║
+║     │                                                                      ║
+║     ├── Main Content Area                                                 ║
+║     │   └── <Outlet /> (renders child routes)                             ║
+║     │                                                                      ║
+║     ├── SpotifyPlayerBar (Sticky Bottom)                                  ║
+║     │   ├── Left: Book Info (Cover + Title + Author)                     ║
+║     │   ├── Center: Controls (Skip Back, Play/Pause, Skip Forward)       ║
+║     │   └── Right: Settings (Playback Speed, Volume)                     ║
+║     │                                                                      ║
+║     └── Bottom Navigation (Mobile only)                                   ║
+║         └── Nav Items (Home, Library, Profile, Admin)                     ║
+║                                                                            ║
+║  2. Home_Spotify                                                          ║
+║     │                                                                      ║
+║     ├── Greeting Header ("Good morning/afternoon/evening")                ║
+║     │                                                                      ║
+║     ├── Quick Access Grid (6 cards, 2-3 columns)                         ║
+║     │   └── QuickAccessCard × 6                                          ║
+║     │                                                                      ║
+║     ├── HorizontalShelf: "Trending Now"                                   ║
+║     │   └── SpotifyBookCard × N                                          ║
+║     │                                                                      ║
+║     ├── Premium Banner (if no subscription)                               ║
+║     │                                                                      ║
+║     ├── HorizontalShelf: "Premium Series"                                 ║
+║     │   └── SpotifyBookCard × N                                          ║
+║     │                                                                      ║
+║     ├── HorizontalShelf: "Top Audiobooks"                                 ║
+║     │   └── SpotifyBookCard × N                                          ║
+║     │                                                                      ║
+║     └── HorizontalShelf: "Jump Back In"                                   ║
+║         └── SpotifyBookCard × N                                          ║
+║                                                                            ║
+║  3. BookDetail_Spotify                                                    ║
+║     │                                                                      ║
+║     ├── Hero Section (gradient background)                                ║
+║     │   ├── Large Cover Art (256x256 - 288x288)                          ║
+║     │   ├── Book Title (4xl-6xl responsive)                               ║
+║     │   ├── Author + Metadata                                             ║
+║     │   └── Description Preview                                           ║
+║     │                                                                      ║
+║     ├── Action Bar                                                        ║
+║     │   ├── Play Button (Green circle)                                    ║
+║     │   └── Unlock Button (if premium)                                    ║
+║     │                                                                      ║
+║     ├── Episodes Table                                                    ║
+║     │   └── EpisodeRow × N                                               ║
+║     │       ├── Episode Number                                            ║
+║     │       ├── Title                                                     ║
+║     │       ├── Description                                               ║
+║     │       └── Duration                                                  ║
+║     │                                                                      ║
+║     └── Full Description Section                                          ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                            COLOR SCHEME                                    ║
+╠═══════════════════════════════════════════════════════════════════════════╣
+║                                                                            ║
+║  Sidebar:           #000000 (Pure Black)                                  ║
+║  Main Content:      #121212 (Spotify Base) with gradient to black        ║
+║  Cards:             #1a1a1a (Elevated)                                    ║
+║  Hover:             #282828 (Highlight)                                   ║
+║  Player:            #000000 (Pure Black)                                  ║
+║                                                                            ║
+║  Primary Text:      #ffffff (White)                                       ║
+║  Secondary Text:    #b3b3b3 (Gray)                                        ║
+║  Muted Text:        #6a6a6a (Dark Gray)                                   ║
+║                                                                            ║
+║  Primary Accent:    #7b5ea7 (Your Purple)                                 ║
+║  Play Button:       #1ed760 (Spotify Green)                               ║
+║  Premium Badge:     #FFD700 (Gold)                                        ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+═══════════════════════════════════════════════════════════════════════════
+                              LEGEND
+═══════════════════════════════════════════════════════════════════════════
+
+  ┌─┐  Box/Container
+  │ │  Vertical line
+  ─── Horizontal line
+  ═══ Thick line (emphasis)
+  ╔═╗  Double-line box (elevated section)
+  →   Scroll direction
+  ⚬   Progress indicator
+  🏠  Home icon
+  📚  Library icon
+  👤  Profile icon
+  🛡️   Admin icon
+  👑  Premium badge
+  ✨  Special series
+  📈  Trending
+  🔒  Locked content
+  ◁   Skip back
+  ⏮   Previous (disabled)
+  ▶   Play
+  ⏭   Next (disabled)
+  ▷   Skip forward
+
+═══════════════════════════════════════════════════════════════════════════
+*/

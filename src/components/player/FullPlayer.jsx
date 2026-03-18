@@ -1,92 +1,99 @@
-import { Play, Pause, SkipBack, SkipForward, Volume2 } from 'lucide-react'
-import usePlayer from '../../hooks/usePlayer'
-import useAudioEngine from '../../hooks/useAudioEngine'
+import { Play, Pause, SkipBack, SkipForward, Volume2, ChevronDown } from 'lucide-react'
+import usePlayerStore from '../../store/playerStore'
 
-export default function FullPlayer() {
-    const { currentEpisode, isPlaying, currentTime, duration, togglePlay, playNext, playPrevious } = usePlayer()
-    const { seek } = useAudioEngine()
-
-    if (!currentEpisode) {
-        return (
-            <div className="min-h-screen bg-bg-primary flex items-center justify-center">
-                <p className="text-text-muted">No episode playing</p>
-            </div>
-        )
-    }
+/**
+ * FullPlayer — expanded full-screen player view.
+ * Used in /book/:bookId/episode/:epId route.
+ */
+export default function FullPlayer({ onClose }) {
+    const { currentEpisode, currentBook, isPlaying, currentTime, duration, volume, actions } = usePlayerStore()
 
     const progress = duration > 0 ? (currentTime / duration) * 100 : 0
 
-    const formatTime = (seconds) => {
-        const mins = Math.floor(seconds / 60)
-        const secs = Math.floor(seconds % 60)
-        return `${mins}:${secs.toString().padStart(2, '0')}`
-    }
-
-    const handleSeek = (e) => {
-        const rect = e.currentTarget.getBoundingClientRect()
-        const x = e.clientX - rect.left
-        const percentage = x / rect.width
-        seek(percentage * duration)
+    const formatTime = (s) => {
+        const m = Math.floor(s / 60)
+        const sec = Math.floor(s % 60)
+        return `${m}:${sec.toString().padStart(2, '0')}`
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-bg-primary to-bg-secondary flex items-center justify-center p-6">
-            <div className="w-full max-w-md">
-                <img
-                    src={currentEpisode.book?.cover_url || 'https://via.placeholder.com/400'}
-                    alt={currentEpisode.title}
-                    className="w-full aspect-square rounded-3xl shadow-2xl mb-8 object-cover"
-                />
+        <div
+            className="flex flex-col min-h-screen px-6 py-8 gap-6"
+            style={{ background: 'var(--bg-primary)' }}
+        >
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <button onClick={onClose} style={{ color: 'var(--text-muted)' }}>
+                    <ChevronDown size={24} />
+                </button>
+                <span className="text-sm font-medium text-text-secondary">Now Playing</span>
+                <div className="w-8" />
+            </div>
 
-                <div className="text-center mb-8">
-                    <h1 className="font-display text-2xl font-bold text-white mb-2">
-                        {currentEpisode.title}
-                    </h1>
-                    <p className="text-text-muted">{currentEpisode.book?.title || 'Unknown Book'}</p>
-                </div>
+            {/* Cover Art */}
+            <div
+                className="w-full aspect-square rounded-2xl overflow-hidden mx-auto max-w-xs"
+                style={{ boxShadow: 'var(--shadow-glow)', background: 'var(--bg-elevated)' }}
+            >
+                {currentBook?.cover_url && (
+                    <img src={currentBook.cover_url} alt={currentBook.title} className="w-full h-full object-cover" />
+                )}
+            </div>
 
-                <div className="mb-8">
+            {/* Track Info */}
+            <div className="text-center space-y-1">
+                <h2 className="font-display text-xl font-bold text-text-primary">{currentEpisode?.title}</h2>
+                <p className="text-text-muted text-sm">{currentBook?.title}</p>
+            </div>
+
+            {/* Progress */}
+            <div className="space-y-2">
+                <div
+                    className="h-1.5 w-full rounded-full overflow-hidden cursor-pointer"
+                    style={{ background: 'var(--border-subtle)' }}
+                >
                     <div
-                        onClick={handleSeek}
-                        className="h-2 bg-bg-secondary rounded-full cursor-pointer mb-2"
-                    >
-                        <div
-                            className="h-full bg-accent rounded-full transition-all"
-                            style={{ width: `${progress}%` }}
-                        />
-                    </div>
-                    <div className="flex justify-between text-xs text-text-muted">
-                        <span>{formatTime(currentTime)}</span>
-                        <span>{formatTime(duration)}</span>
-                    </div>
+                        className="h-full rounded-full"
+                        style={{ width: `${progress}%`, background: 'var(--accent)' }}
+                    />
                 </div>
-
-                <div className="flex items-center justify-center gap-6 mb-8">
-                    <button
-                        onClick={playPrevious}
-                        className="p-3 text-text-muted hover:text-white transition"
-                    >
-                        <SkipBack className="w-7 h-7" />
-                    </button>
-
-                    <button
-                        onClick={togglePlay}
-                        className="p-5 bg-accent text-white rounded-full hover:bg-accent/90 transition shadow-lg"
-                    >
-                        {isPlaying ? (
-                            <Pause className="w-8 h-8" />
-                        ) : (
-                            <Play className="w-8 h-8 ml-1" />
-                        )}
-                    </button>
-
-                    <button
-                        onClick={playNext}
-                        className="p-3 text-text-muted hover:text-white transition"
-                    >
-                        <SkipForward className="w-7 h-7" />
-                    </button>
+                <div className="flex justify-between text-xs text-text-muted">
+                    <span>{formatTime(currentTime)}</span>
+                    <span>{formatTime(duration)}</span>
                 </div>
+            </div>
+
+            {/* Controls */}
+            <div className="flex items-center justify-center gap-6">
+                <button onClick={actions.skipBack} style={{ color: 'var(--text-secondary)' }} aria-label="Skip back 15s">
+                    <SkipBack size={28} />
+                </button>
+                <button
+                    onClick={actions.togglePlay}
+                    className="w-16 h-16 rounded-full flex items-center justify-center"
+                    style={{ background: 'var(--accent)', boxShadow: 'var(--shadow-glow)' }}
+                    aria-label={isPlaying ? 'Pause' : 'Play'}
+                >
+                    {isPlaying ? <Pause size={28} fill="#fff" color="#fff" /> : <Play size={28} fill="#fff" color="#fff" />}
+                </button>
+                <button onClick={actions.skipForward} style={{ color: 'var(--text-secondary)' }} aria-label="Skip forward 15s">
+                    <SkipForward size={28} />
+                </button>
+            </div>
+
+            {/* Volume */}
+            <div className="flex items-center gap-3">
+                <Volume2 size={18} style={{ color: 'var(--text-muted)' }} />
+                <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={volume}
+                    onChange={(e) => actions.setVolume(Number(e.target.value))}
+                    className="flex-1"
+                    aria-label="Volume"
+                />
             </div>
         </div>
     )

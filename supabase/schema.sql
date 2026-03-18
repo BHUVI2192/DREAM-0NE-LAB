@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS episodes (
     episode_order INTEGER,
     title TEXT NOT NULL,
     description TEXT,
+    thumbnail_url TEXT,
     audio_url TEXT NOT NULL,
     audio_drive_id TEXT,
     duration_seconds INTEGER DEFAULT 0,
@@ -120,6 +121,7 @@ CREATE TABLE IF NOT EXISTS alerts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title TEXT NOT NULL,
     content TEXT,
+    audience TEXT DEFAULT 'all' CHECK (audience IN ('all', 'premium', 'free')),
     type TEXT DEFAULT 'info' CHECK (type IN ('info', 'warning', 'error', 'success')),
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -184,6 +186,14 @@ BEGIN
     END IF;
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='episodes' AND column_name='episode_order') THEN
         ALTER TABLE episodes ADD COLUMN episode_order INTEGER;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='episodes' AND column_name='thumbnail_url') THEN
+        ALTER TABLE episodes ADD COLUMN thumbnail_url TEXT;
+    END IF;
+
+    -- Add columns to alerts if they don't exist
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='alerts' AND column_name='audience') THEN
+        ALTER TABLE alerts ADD COLUMN audience TEXT DEFAULT 'all';
     END IF;
 
     -- Add columns to purchases if they don't exist

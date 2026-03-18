@@ -1,20 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
   margin: 0;
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #0A0A0F;
+  background-color: #000000;
   color: #FFFFFF;
+  overflow: hidden;
 }
 
 * {
   box-sizing: border-box;
 }
 
+/* Keep keyboard navigation visible even when components remove default outlines. */
+*:focus-visible {
+  outline: 2px solid #1ed760;
+  outline-offset: 2px;
+}
+
+/* Scrollbar styling - Spotify style */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #404040;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #505050;
+}
+
+/* Animations */
 @keyframes fade-up {
   from {
     opacity: 0;
@@ -28,4 +57,9 @@ body {
 
 .animate-fade-up {
   animation: fade-up 0.4s ease-out;
+}
+
+/* Smooth transitions */
+.smooth-transition {
+  transition: all 0.2s cubic-bezier(0.3, 0, 0.4, 1);
 }

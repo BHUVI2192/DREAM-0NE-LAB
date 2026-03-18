@@ -35,7 +35,18 @@ export default function useBooks() {
         } finally {
             setLoading(false)
         }
-    }
-
-    return { books, loading, error, refetch: loadBooks }
-}
+                        // Filter books uploaded by admin and remove duplicates by title
+                        const adminEmail = 'cnbhuvan011@gmail.com';
+                        const uploadedBooks = data.filter(book => book.uploaded_by === adminEmail);
+                        const uniqueBooks = [];
+                        const seenTitles = new Set();
+                        for (const book of uploadedBooks) {
+                            if (!seenTitles.has(book.title)) {
+                                uniqueBooks.push({
+                                    ...book,
+                                    total_episodes: book.episodes[0]?.count || 0
+                                });
+                                seenTitles.add(book.title);
+                            }
+                        }
+                        setBooks(uniqueBooks);

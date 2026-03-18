@@ -1,76 +1,152 @@
-import { Play, Pause, SkipBack, SkipForward } from 'lucide-react'
-import usePlayer from '../../hooks/usePlayer'
-import useAudioEngine from '../../hooks/useAudioEngine'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { SkipBack, SkipForward, Play, Pause, ChevronUp } from 'lucide-react'
+import useAudioEngine from '../../hooks/useAudioEngine'
 
 export default function PlayerBar() {
     const navigate = useNavigate()
-    const { currentEpisode, isPlaying, currentTime, duration, togglePlay, playNext, playPrevious } = usePlayer()
-    const { seek } = useAudioEngine()
+    const {
+        currentEpisode,
+        currentBook,
+        isPlaying,
+        currentTime,
+        duration,
+        togglePlay,
+        skipForward,
+        skipBack,
+        seek
+    } = useAudioEngine()
 
-    if (!currentEpisode) return null
+    const [isVisible, setIsVisible] = useState(false)
+    const progressBarRef = useRef(null)
 
-    const progress = duration > 0 ? (currentTime / duration) * 100 : 0
+    // Trigger slide-up animation when an episode is first loaded
+    useEffect(() => {
+        if (currentEpisode && !isVisible) {
+            requestAnimationFrame(() => setIsVisible(true))
+        } else if (!currentEpisode) {
+            setIsVisible(false)
+        }
+    }, [currentEpisode, isVisible])
 
+    if (!currentEpisode || !currentBook) return null
+
+    // Format time (MM:SS)
     const formatTime = (seconds) => {
+        if (!seconds || isNaN(seconds)) return '0:00'
         const mins = Math.floor(seconds / 60)
         const secs = Math.floor(seconds % 60)
         return `${mins}:${secs.toString().padStart(2, '0')}`
     }
 
+    const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0
+
+    // Handle clicking on the progress bar to seek
+    const handleProgressClick = (e) => {
+        if (!progressBarRef.current || !duration) return
+
+        const rect = progressBarRef.current.getBoundingClientRect()
+        const clickX = e.clientX - rect.left
+        const percentage = clickX / rect.width
+        const newTime = percentage * duration
+
+        seek(newTime)
+    }
+
+    const handleExpand = () => {
+        navigate(`/book/${currentBook.id}/episode/${currentEpisode.id}`)
+    }
+
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-bg-elevated border-t border-border-subtle backdrop-blur-xl z-40">
+        <div
+            className={`fixed left-0 right-0 z-40 bg-elevated border-t border-subtle shadow-player transition-transform duration-300 ease-out
+                ${isVisible ? 'translate-y-0' : 'translate-y-full'}`}
+            style={{ bottom: '64px' }} // Above mobile nav
+        >
+            {/* Top edge progress bar (clickable) */}
             <div
-                className="absolute top-0 left-0 h-1 bg-accent transition-all"
-                style={{ width: `${progress}%` }}
-            />
-
-            <div className="flex items-center gap-4 px-6 py-3">
-                <img
-                    src={currentEpisode.book?.cover_url || 'https://via.placeholder.com/60'}
-                    alt={currentEpisode.title}
-                    className="w-14 h-14 rounded-lg object-cover cursor-pointer"
-                    onClick={() => navigate(`/player`)}
+                ref={progressBarRef}
+                className="absolute top-0 left-0 right-0 h-1 bg-subtle/30 cursor-pointer group"
+                onClick={handleProgressClick}
+            >
+                <div
+                    className="h-full bg-accent transition-all duration-100 ease-linear group-hover:bg-accent-light"
+                    style={{ width: `${progressPercent}%` }}
                 />
+            </div>
 
-                <div className="flex-1 min-w-0">
-                    <h4 className="text-white font-semibold text-sm truncate">{currentEpisode.title}</h4>
-                    <p className="text-text-muted text-xs truncate">
-                        {currentEpisode.book?.title || 'Unknown Book'}
-                    </p>
+            {/* The main bar content (72px height) */}
+            <div className="h-[72px] flex items-center justify-between px-4 max-w-7xl mx-auto">
+
+                {/* 1. LEFT: Cover & Metadata */}
+                <div
+                    className="flex items-center gap-3 w-1/3 min-w-0 cursor-pointer"
+                    onClick={handleExpand}
+                >
+                    <div className="w-10 h-10 rounded-md overflow-hidden bg-white/5 flex-shrink-0">
+                        {currentBook.cover_url ? (
+                            <img
+                                src={currentBook.cover_url}
+                                alt="Cover"
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-accent/20" />
+                        )}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                        <span className="text-[13px] font-medium text-primary truncate">
+                            {currentEpisode.title}
+                        </span>
+                        <span className="text-[11px] text-secondary truncate">
+                            {currentBook.title}
+                        </span>
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-4">
+                {/* 2. CENTER: Controls */}
+                <div className="flex items-center justify-center gap-4 w-1/3">
                     <button
-                        onClick={playPrevious}
-                        className="p-2 text-text-muted hover:text-white transition"
+                        onClick={skipBack}
+                        className="text-secondary hover:text-primary transition-colors p-2"
+                        aria-label="Skip back 15 seconds"
                     >
-                        <SkipBack className="w-5 h-5" />
+                        <SkipBack size={20} />
                     </button>
 
                     <button
                         onClick={togglePlay}
-                        className="p-3 bg-accent text-white rounded-full hover:bg-accent/90 transition"
+                        className="w-11 h-11 rounded-full bg-accent text-white flex items-center justify-center hover:bg-accent-hover transition-colors flex-shrink-0"
+                        aria-label={isPlaying ? "Pause" : "Play"}
                     >
                         {isPlaying ? (
-                            <Pause className="w-5 h-5" />
+                            <Pause size={20} className="fill-current" />
                         ) : (
-                            <Play className="w-5 h-5 ml-0.5" />
+                            <Play size={20} className="fill-current ml-1" />
                         )}
                     </button>
 
                     <button
-                        onClick={playNext}
-                        className="p-2 text-text-muted hover:text-white transition"
+                        onClick={skipForward}
+                        className="text-secondary hover:text-primary transition-colors p-2"
+                        aria-label="Skip forward 15 seconds"
                     >
-                        <SkipForward className="w-5 h-5" />
+                        <SkipForward size={20} />
                     </button>
                 </div>
 
-                <div className="hidden md:flex items-center gap-2 text-xs text-text-muted">
-                    <span>{formatTime(currentTime)}</span>
-                    <span>/</span>
-                    <span>{formatTime(duration)}</span>
+                {/* 3. RIGHT: Progress Text & Expand */}
+                <div className="flex items-center justify-end gap-3 w-1/3">
+                    <span className="font-mono text-[10px] text-muted tabular-nums hidden sm:block">
+                        {formatTime(currentTime)} / {formatTime(duration)}
+                    </span>
+                    <button
+                        onClick={handleExpand}
+                        className="text-secondary hover:text-primary transition-colors p-2"
+                        aria-label="Expand player"
+                    >
+                        <ChevronUp size={24} />
+                    </button>
                 </div>
             </div>
         </div>

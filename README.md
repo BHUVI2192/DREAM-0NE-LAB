@@ -7,7 +7,7 @@ A premium audio storytelling platform built with React, Supabase, and PhonePe pa
 - **Audio Storytelling**: Stream audiobooks and podcasts
 - **Subscription Model**: Monthly subscription for standard content
 - **Special Series**: One-time purchase for premium content
-- **PhonePe Integration**: Secure Indian payment gateway
+- **Optional Payment Integration**: PhonePe edge-function scaffolding is included
 - **Admin Dashboard**: Manage books, episodes, and users
 - **Responsive Design**: Works on desktop and mobile
 
@@ -54,18 +54,23 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ### 4. Supabase Setup
 
 1. Create a new Supabase project
-2. Run the schema in Supabase SQL Editor:
+2. Run the base schema in Supabase SQL Editor:
    ```bash
    # Copy contents of supabase/schema.sql and run in Supabase SQL Editor
    ```
 
-3. Deploy Edge Functions:
+3. Run the compatibility and RLS fix script after the schema:
+   ```bash
+   # Copy contents of supabase/FIX_ALL_ERRORS.sql and run in Supabase SQL Editor
+   ```
+
+4. Deploy Edge Functions if you plan to enable payments:
    ```bash
    supabase functions deploy create-phonepe-order
    supabase functions deploy phonepe-callback
    ```
 
-4. Set Edge Function secrets:
+5. Set Edge Function secrets if payments are enabled:
    ```bash
    supabase secrets set PHONEPE_MERCHANT_ID=your_merchant_id
    supabase secrets set PHONEPE_SALT_KEY=your_salt_key
@@ -74,7 +79,7 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
    supabase secrets set APP_URL=http://localhost:5173
    ```
 
-### 5. PhonePe Integration
+### 5. PhonePe Integration (Optional)
 
 1. Sign up for [PhonePe Business](https://business.phonepe.com/)
 2. Get your Merchant ID and Salt Key from PhonePe dashboard
