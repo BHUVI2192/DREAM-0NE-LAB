@@ -13,7 +13,7 @@ export default function useAuth() {
       loading,
       authError,
       isAuthenticated: !!user,
-      isAdmin: user?.email === 'cnbhuvan011@gmail.com',
+      isAdmin: ['cnbhuvan011@gmail.com', 'dayakeriyavar@gmail.com'].includes(user?.email),
       isSubscribed
     }
 }
