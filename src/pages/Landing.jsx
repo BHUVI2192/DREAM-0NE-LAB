@@ -93,8 +93,8 @@ export default function Landing() {
             <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#080810]/90 backdrop-blur-xl border-b border-white/[0.06] shadow-lg shadow-black/30' : 'bg-transparent'}`}>
                 <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-xl overflow-hidden border border-white/10 flex items-center justify-center shadow-lg shadow-violet-500/30">
-                            <img src="/logo.jpg" alt="Logo" className="w-full h-full object-cover" />
+                        <div className="w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center shadow-lg shadow-violet-500/30">
+                            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
                         </div>
                         <span className="text-white font-bold text-lg tracking-tight">Dream One Lab</span>
                     </div>
@@ -425,8 +425,8 @@ export default function Landing() {
                 <div className="max-w-6xl mx-auto">
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-8">
                         <div className="flex items-center gap-2.5">
-                            <div className="w-7 h-7 rounded-lg overflow-hidden border border-white/10 flex items-center justify-center">
-                                <img src="/logo.jpg" alt="Logo" className="w-full h-full object-cover" />
+                            <div className="w-7 h-7 rounded-lg overflow-hidden flex items-center justify-center">
+                                <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
                             </div>
                             <span className="text-white font-bold">Dream One Lab</span>
                             <span className="text-white/25 text-sm">· Stories worth your time</span>

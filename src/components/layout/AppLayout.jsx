@@ -49,8 +49,8 @@ export default function AppLayout() {
             >
                 {/* Logo */}
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10">
-                        <img src="/logo.jpg" alt="Logo" className="w-full h-full object-cover" />
+                    <div className="w-8 h-8 rounded-full overflow-hidden">
+                        <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
                     </div>
                     <span
                         className="font-display font-bold text-xl tracking-tight"
