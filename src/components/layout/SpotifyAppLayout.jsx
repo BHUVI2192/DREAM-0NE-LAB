@@ -70,8 +70,8 @@ export default function SpotifyAppLayout() {
                 {/* Main Links Container */}
                 <div className="bg-spotify-elevated rounded-lg p-2.5 flex flex-col gap-1 flex-1">
                     <div className="px-4 py-3 mb-2 flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-accent to-blue-500 flex items-center justify-center">
-                            <span className="text-sm font-bold text-white tracking-widest pl-0.5">DL</span>
+                        <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center border border-white/10">
+                            <img src="/logo.jpg" alt="Dream One Lab Logo" className="w-full h-full object-cover" />
                         </div>
                         <span className="text-[1.1rem] font-bold tracking-tight">Dream One Lab</span>
                     </div>
